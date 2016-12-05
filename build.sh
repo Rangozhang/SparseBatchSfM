@@ -1,8 +1,5 @@
 
-if [ ! -f BUILD ]; then
-  echo "Creating a build directory"
-  mkdir BUILD
-fi
+mkdir -p BUILD
 
 cd BUILD
 cmake ..
