@@ -15,7 +15,7 @@ struct FeatureStruct {
   Eigen::SparseMatrix<int, Eigen::RowMajor> skeleton;
 };
 
-struct Graph {
+struct GraphStruct {
   std::vector<int> frame_idx;
   std::vector<Eigen::Matrix<double, 3, 3, Eigen::ColMajor>> K;
   std::vector<Eigen::Matrix<double, 3, 4, Eigen::ColMajor>> Mot;
