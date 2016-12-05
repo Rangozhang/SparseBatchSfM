@@ -1,3 +1,6 @@
+#ifndef TWOVIEWRECONSTRUCTION_HPP_
+#define TWOVIEWRECONSTRUCTION_HPP_
+
 #include <iostream>
 #include <vector>
 #include <memory>
@@ -12,3 +15,5 @@ class TwoViewReconstruction {
 };
 
 } // namespace sparse_batch_sfm
+
+#endif
