@@ -5,7 +5,7 @@ find_package( OpenCV REQUIRED )
 set(src "src")
 set(inc "include")
 include_directories(${inc})
-include_directories(${PROJECT_SOURCE_DIR}/3rd-party/eigen)
+include_directories(${PROJECT_SOURCE_DIR}/3rd_party/eigen)
 
 add_library(Util ${inc}/utils.hpp ${src}/utils.cpp)
 
@@ -17,6 +17,7 @@ add_library(Protos ${inc}/protos.hpp)
 set_target_properties(Protos PROPERTIES LINKER_LANGUAGE CXX)
 
 add_library(FEATUREPROCESSOR ${inc}/FeatureProcessor.hpp ${src}/FeatureProcessor.cpp)
+#target_link_libraries(FEATUREPROCESSOR Protos)
 
 add_library(TWOVIEWRECONSTRUCTION ${inc}/TwoViewReconstruction.hpp ${src}/TwoViewReconstruction.cpp)
 
