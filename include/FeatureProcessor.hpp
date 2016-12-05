@@ -2,8 +2,8 @@
 #define FEATUREPROCESSOR_HPP_
 
 #include <iostream>
+#include <memory>
 #include <vector>
-#include <unordered_set>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 

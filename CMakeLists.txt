@@ -16,6 +16,8 @@ add_library(SparseBatchSfM ${inc}/SparseBatchSfM.hpp ${src}/SparseBatchSfM.cpp)
 add_library(Protos ${inc}/protos.hpp)
 set_target_properties(Protos PROPERTIES LINKER_LANGUAGE CXX)
 
+add_library(FEATUREPROCESSOR ${inc}/FeatureProcessor.hpp ${src}/FeatureProcessor.cpp)
+
 add_library(TWOVIEWRECONSTRUCTION ${inc}/TwoViewReconstruction.hpp ${src}/TwoViewReconstruction.cpp)
 
 add_executable(main ${src}/main.cpp)

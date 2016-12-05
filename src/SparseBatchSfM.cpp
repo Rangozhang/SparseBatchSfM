@@ -7,10 +7,12 @@ namespace sparse_batch_sfm {
 
   SparseBatchSfM::SparseBatchSfM() {
     image_capture_.reset(new ImageCapture());
+    feature_processor_.reset(new FeatureProcessor());
   }
 
   SparseBatchSfM::~SparseBatchSfM() {
     image_capture_.reset(); 
+    feature_processor_.reset();
   }
 
   SparseBatchSfM* SparseBatchSfM::instance_ = nullptr;
@@ -32,6 +34,8 @@ namespace sparse_batch_sfm {
     }
 
     int seq_len = controller->image_seq.size();
+    
+    // controller->feature_processor_
 
   }
 
