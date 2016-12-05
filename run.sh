@@ -1,1 +1,1 @@
-BUILD/main input
+BUILD/main photos

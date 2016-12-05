@@ -10,7 +10,7 @@
 #include "utils.hpp"
 
 static const char* arg_keys = {
-  "{ @input_path          |./input| Input path }"
+  "{ @input_path          |./photos| Input path }"
 };
 
 int main(int argc, char** argv) {
