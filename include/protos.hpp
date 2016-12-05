@@ -1,6 +1,9 @@
 #ifndef PROTOS_HPP_
 #define PROTOS_HPP_
 
+#include<Eigen/Dense>
+#include<Eigen/Sparse>
+
 struct FeaturePoint {
   Eigen::Vector2d pos;
   Eigen::Vector3i rgb;
