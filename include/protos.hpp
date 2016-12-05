@@ -11,8 +11,8 @@ struct FeaturePoint {
 
 struct FeatureStruct {
   std::vector<FeaturePoint> feature_point;
-  std::SparseMatrix<std::Complex<double>, Eigen::RowMajor> feature_idx;
-  std::SparseMatrix<std::Complex<double>, Eigen::RowMajor> skeleton;
+  Eigen::SparseMatrix<std::complex<double>, Eigen::RowMajor> feature_idx;
+  Eigen::SparseMatrix<std::complex<double>, Eigen::RowMajor> skeleton;
 }
 
 struct Graph {
