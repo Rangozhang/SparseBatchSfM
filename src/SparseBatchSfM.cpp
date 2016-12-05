@@ -22,9 +22,9 @@ namespace sparse_batch_sfm {
     return instance_;
   }
 
-  void SparseBatchSfM::run(const string& input_path) {
-    cout << "INPUT PARAMS" << endl;
-    cout << "Input path: " << input_path << endl;
+  void SparseBatchSfM::run(const std::string& input_path) {
+    std::cout << "INPUT PARAMS" << std::endl;
+    std::cout << "Input path: " << input_path << std::endl;
     SparseBatchSfM* controller = controller->getInstance();
     if (!controller->image_capture_->ReadFromDir(
                   input_path, controller->image_seq)) {

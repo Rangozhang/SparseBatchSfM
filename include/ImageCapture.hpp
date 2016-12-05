@@ -8,15 +8,12 @@
 
 #include "utils.hpp"
 
-using namespace cv;
-using namespace std;
-
 namespace sparse_batch_sfm {
 
 class ImageCapture {
  public:
-  bool ReadFromDir(const string& input_path,
-          vector<unique_ptr<Mat>>& image_seq);
+  bool ReadFromDir(const std::string& input_path,
+          std::vector<std::unique_ptr<cv::Mat>>& image_seq);
 };
 
 } // namespace sparse_batch_sfm

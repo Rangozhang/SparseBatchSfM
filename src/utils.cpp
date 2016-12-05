@@ -7,13 +7,13 @@
 #include <opencv2/core/core.hpp>
 #include "utils.hpp"
 
-using namespace std;
-using namespace cv;
-
+/*
 bool arg_parser(int argc, char** argv, const char* arg_keys,
       string* input_path) {
   CommandLineParser parser(argc, argv, arg_keys);
   *input_path = parser.get<String>(0);
   return true;
 }
+*/
+
 #endif

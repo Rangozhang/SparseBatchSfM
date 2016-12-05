@@ -15,7 +15,7 @@ class SparseBatchSfM {
   virtual ~SparseBatchSfM();
 
   static SparseBatchSfM* getInstance();
-  static void run(const string& input_path);
+  static void run(const std::string& input_path);
 
  private:
   static SparseBatchSfM* instance_;
@@ -25,7 +25,7 @@ class SparseBatchSfM {
 
  private:
   // input video sequence
-  vector<unique_ptr<Mat>> image_seq;
+  std::vector<std::unique_ptr<cv::Mat>> image_seq;
 };
 
 } // namespace sparse_batch_sfm
