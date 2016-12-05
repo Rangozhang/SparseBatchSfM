@@ -22,5 +22,5 @@ add_library(FEATUREPROCESSOR ${inc}/FeatureProcessor.hpp ${src}/FeatureProcessor
 add_library(TWOVIEWRECONSTRUCTION ${inc}/TwoViewReconstruction.hpp ${src}/TwoViewReconstruction.cpp)
 
 add_executable(main ${src}/main.cpp)
-target_link_libraries(main ${OpenCV_LIBS} SparseBatchSfM ImageCapture Util Protos)
+target_link_libraries(main ${OpenCV_LIBS} SparseBatchSfM ImageCapture Util Protos FEATUREPROCESSOR)
 add_definitions(-std=c++11)

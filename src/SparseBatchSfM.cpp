@@ -29,13 +29,13 @@ namespace sparse_batch_sfm {
     std::cout << "Input path: " << input_path << std::endl;
     SparseBatchSfM* controller = controller->getInstance();
     if (!controller->image_capture_->ReadFromDir(
-                  input_path, controller->image_seq)) {
+                  input_path, controller->image_seq_)) {
       return;
     }
 
-    int seq_len = controller->image_seq.size();
+    int seq_len = controller->image_seq_.size();
     
-    //controller->feature_processor_->extract(controller->image_seq);
+    controller->feature_processor_->feature_match(controller->image_seq_, controller->feature_struct_);
 
   }
 

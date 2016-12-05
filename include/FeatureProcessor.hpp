@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <opencv2/core/core.hpp>
 
 #include "protos.hpp"
 
@@ -14,8 +15,7 @@ class FeatureProcessor {
   explicit FeatureProcessor();
   virtual ~FeatureProcessor();
   // or extractMatch()? put those two in the same function
-  // bool extract(const std::unique_ptr<cv::Mat>& image_seq, rawSIFT); 
-  // bool match(rawSIFT, FeatureStruct& feature_struct);
+  bool feature_match(const std::vector<std::unique_ptr<cv::Mat>>& image_seq, FeatureStruct& feature_struct); 
   bool skeletonize(Eigen::SparseMatrix<int, Eigen::RowMajor>& skeleton);
 };
 
