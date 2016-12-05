@@ -22,6 +22,7 @@ class SparseBatchSfM {
 
   // input images
   std::unique_ptr<ImageCapture> image_capture_;
+  std::unique_ptr<FeatureProcessor> feature_processor_;
 
  private:
   // input video sequence
