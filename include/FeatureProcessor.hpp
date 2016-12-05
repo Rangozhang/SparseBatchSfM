@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <3rd_party/eigen/Eigen/Dense>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 

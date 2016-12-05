@@ -35,7 +35,7 @@ namespace sparse_batch_sfm {
 
     int seq_len = controller->image_seq.size();
     
-    // controller->feature_processor_
+    controller->feature_processor_->extract(controller->image_seq);
 
   }
 
