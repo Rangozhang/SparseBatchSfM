@@ -9,18 +9,25 @@
 #include "SparseBatchSfM.hpp"
 #include "utils.hpp"
 
-static const char* arg_keys = {
-  "{ @input_path          |./photos| Input path }"
-};
+// static const char* arg_keys = {
+//   "{ @input_path          |./photos| Input path }"
+// };
 
 int main(int argc, char** argv) {
 
   std::string input_path;
 
-  if (!arg_parser(argc, argv, arg_keys,
-                 &input_path)) {
-    return -1;
+  if (argc < 2) {
+    input_path = "photos";
+  } else {
+    input_path = argv[1];
   }
+
+
+  // if (!arg_parser(argc, argv, arg_keys,
+  //                &input_path)) {
+  //   return -1;
+  // }
 
   sparse_batch_sfm::SparseBatchSfM::run(input_path);
 
