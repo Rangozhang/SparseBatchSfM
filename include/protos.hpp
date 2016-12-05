@@ -1,12 +1,12 @@
 #ifndef PROTOS_HPP_
 #define PROTOS_HPP_
 
-class FeatureStruct {
-
+struct FeatureStruct {
+ public:
 }
 
-class Graph {
-
+struct Graph {
+ public:
 }
 
 #endif
