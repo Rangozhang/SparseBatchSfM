@@ -1,7 +1,7 @@
 #include "FeatureProcessor.hpp"
 
 namespace sparse_batch_sfm {
-  bool sekletonize(Eigen::SparseMatrix<int, Eigen::RowMajor>& skeleton) {
+  bool FeatureProcessor::skeletonize(Eigen::SparseMatrix<int, Eigen::RowMajor>& skeleton) {
   
   }
 }
