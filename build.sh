@@ -1,5 +1,5 @@
 
-if [ ! -f build ]; then
+if [ ! -f BUILD ]; then
   echo "Creating a build directory"
   mkdir BUILD
 fi
