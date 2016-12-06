@@ -47,7 +47,7 @@ namespace sparse_batch_sfm {
   return true;
   }
 
-  bool FeatureProcessor::skeletonize(Eigen::SparseMatrix<int, Eigen::RowMajor>& skeleton) {
+  bool FeatureProcessor::skeletonize(Eigen::Matrix<int, Eigen::ColMajor>& skeleton) {
     
   }
 }
