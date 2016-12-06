@@ -2,7 +2,6 @@
 #define FEATUREPROCESSOR_HPP_
 
 #include <iostream>
-#include <memory>
 #include <vector>
 #include <opencv2/core/core.hpp>
 

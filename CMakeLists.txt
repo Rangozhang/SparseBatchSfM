@@ -15,12 +15,13 @@ add_library(Protos ${inc}/protos.hpp)
 set_target_properties(Protos PROPERTIES LINKER_LANGUAGE CXX)
 
 add_library(FeatureProcessor ${inc}/FeatureProcessor.hpp ${src}/FeatureProcessor.cpp)
-#target_link_libraries(FEATUREPROCESSOR Protos)
 
 add_library(TwoViewReconstruction ${inc}/TwoViewReconstruction.hpp ${src}/TwoViewReconstruction.cpp)
+
+add_library(BundleAdjustment ${inc}/BundleAdjustment.hpp ${src}/BundleAdjustment.cpp)
 
 add_library(SparseBatchSfM ${inc}/SparseBatchSfM.hpp ${src}/SparseBatchSfM.cpp)
 
 add_executable(main ${src}/main.cpp)
-target_link_libraries(main ${OpenCV_LIBS} SparseBatchSfM ImageCapture Util Protos FeatureProcessor TwoViewReconstruction)
+target_link_libraries(main ${OpenCV_LIBS} SparseBatchSfM ImageCapture Util Protos FeatureProcessor TwoViewReconstruction BundleAdjustment)
 add_definitions(-std=c++11)
