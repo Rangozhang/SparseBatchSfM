@@ -19,7 +19,7 @@ struct GraphStruct {
   std::vector<int> frame_idx;
   std::vector<Eigen::Matrix<double, 3, 3, Eigen::ColMajor>> K;
   std::vector<Eigen::Matrix<double, 3, 4, Eigen::ColMajor>> Mot;
-  Eigen::Matrix<double, 3, Eigen::Dynamic, Eigen::ColMajor> Str;
+  Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::ColMajor> Str; // x, y, z, r, g, b
 };
 
 #endif

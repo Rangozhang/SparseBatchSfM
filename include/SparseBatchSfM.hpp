@@ -6,6 +6,7 @@
 
 #include "ImageCapture.hpp"
 #include "FeatureProcessor.hpp"
+#include "TwoViewReconstruction.hpp"
 #include "utils.hpp"
 
 namespace sparse_batch_sfm {
@@ -17,6 +18,8 @@ class SparseBatchSfM {
 
   static SparseBatchSfM* getInstance();
   static void run(const std::string& input_path);
+  static bool writeGraphToPLYFile(const std::vector<std::unique_ptr<GraphStruct>>& graphs,
+                                  const char* filename);
 
  private:
   static SparseBatchSfM* instance_;
@@ -30,7 +33,7 @@ class SparseBatchSfM {
   // input video sequence
   std::vector<std::unique_ptr<cv::Mat>> image_seq_;
   FeatureStruct feature_struct_;
-  std::vector<GraphStruct> graphs_;
+  std::vector<std::unique_ptr<GraphStruct>> graphs_;
 };
 
 } // namespace sparse_batch_sfm

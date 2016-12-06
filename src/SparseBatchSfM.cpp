@@ -1,6 +1,8 @@
 #ifndef SPARSEBATCHSFM_CPP_
 #define SPARSEBATCHSFM_CPP_
 
+#include <fstream>
+
 #include "SparseBatchSfM.hpp"
 
 namespace sparse_batch_sfm {
@@ -24,6 +26,37 @@ namespace sparse_batch_sfm {
       instance_ = new SparseBatchSfM();
     }
     return instance_;
+  }
+
+  bool SparseBatchSfM::writeGraphToPLYFile(const std::vector<std::unique_ptr<GraphStruct>>& graphs,
+                                           const char* filename) {
+    // only write down the first graph in graphs
+    if (!graphs.size()) return false;
+    const std::unique_ptr<GraphStruct>& graph = graphs[0];
+
+    std::ofstream of(filename);
+
+    int n_points = graph->Str.cols();
+
+    of << "ply"
+       << '\n' << "format ascii 1.0"
+       << '\n' << "element vertex " << n_points
+       << '\n' << "property float x"
+       << '\n' << "property float y"
+       << '\n' << "property float z"
+       << '\n' << "property uchar red"
+       << '\n' << "property uchar green"
+       << '\n' << "property uchar blue"
+       << '\n' << "end_header" << std::endl;
+
+    for (int i = 0; i < n_points; ++i) {
+      of << graph->Str(0, i) << ' ' << graph->Str(1, i) << ' ' << graph->Str(2, i)
+         << graph->Str(3, i) << ' ' << graph->Str(4, i) << ' ' << graph->Str(5, i) << '\n';
+    }
+
+    of.close();
+    
+    return true;
   }
 
   void SparseBatchSfM::run(const std::string& input_path) {

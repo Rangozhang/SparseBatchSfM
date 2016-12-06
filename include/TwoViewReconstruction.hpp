@@ -29,8 +29,8 @@ class TwoViewReconstruction {
   };
 
   bool estimateF(const std::vector<FeaturePoint>& feature_point,
-                               const Eigen::SparseMatrix<int, Eigen::RowMajor> feature_idx);
-  Eigen::Matrix<double, 3, 4, Eigen::ColMajor>> RtFromE(const Matrix3d& K1, const Matrix3d& K2,
+                               const Eigen::SparseMatrix<int, Eigen::RowMajor>& feature_idx);
+  Eigen::Matrix<double, 3, 4, Eigen::ColMajor> RtFromE(const Eigen::Matrix3d& K1, const Eigen::Matrix3d& K2,
                                                         const std::vector<FeaturePoint>& feature_point,
                                                         const Eigen::SparseMatrix<int, Eigen::RowMajor> feature_idx);
   bool triangulate(GraphStruct& graph);

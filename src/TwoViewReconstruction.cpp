@@ -1,8 +1,8 @@
-#include "TwoViewReconstruction"
+#include "TwoViewReconstruction.hpp"
 
 namespace sparse_batch_sfm {
 
-  bool reconstruct(const FeatureStruct& feature_struct, int frame1, int frame2,
+  bool TwoViewReconstruction::reconstruct(const FeatureStruct& feature_struct, int frame1, int frame2,
                           Eigen::Matrix3d K1, Eigen::Matrix3d K2, GraphStruct& graph) {
 
     // 1. compute F
@@ -15,7 +15,7 @@ namespace sparse_batch_sfm {
     E = graph.K[frame1].transpose() * F * graph.K[frame2];
 
     // 3. Mot from E
-    Mot.push_back(RtFromE(graph.K[frame1], graph.K[frame2], feature_struct.feature_point, feature_struct.feature_idx));
+    graph.Mot.push_back(RtFromE(graph.K[frame1], graph.K[frame2], feature_struct.feature_point, feature_struct.feature_idx));
 
     // 4. Triangulation
     if (!triangulate(graph)) {
