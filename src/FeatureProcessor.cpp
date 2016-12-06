@@ -2,7 +2,6 @@
 
 #include "FeatureProcessor.hpp"
 
-
 namespace sparse_batch_sfm {
   bool FeatureProcessor::feature_match(const std::vector<std::unique_ptr<cv::Mat>>& image_seq, FeatureStruct& feature_struct) {
   
