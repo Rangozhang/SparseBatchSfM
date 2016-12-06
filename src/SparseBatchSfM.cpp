@@ -35,7 +35,7 @@ namespace sparse_batch_sfm {
 
     int seq_len = controller->image_seq_.size();
     
-    controller->feature_processor_->feature_match(controller->image_seq_, controller->feature_struct_);
+    controller->feature_processor_->feature_match(controller->image_seq_, controller->feature_struct_, 400, visualize);
 
   }
 

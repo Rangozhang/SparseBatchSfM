@@ -8,10 +8,9 @@
 #include "opencv2/nonfree/features2d.hpp"
 
 namespace sparse_batch_sfm {
-  bool FeatureProcessor::feature_match(const std::vector<std::unique_ptr<cv::Mat>>& image_seq, FeatureStruct& feature_struct) {
+  bool FeatureProcessor::feature_match(const std::vector<std::unique_ptr<cv::Mat>>& image_seq, FeatureStruct& feature_struct, int minHessian = 400, bool visualize = false) {
   
   // SIFT detector and extractor
-  int minHessian = 400;
   cv::SiftFeatureDetector detector(minHessian);
   cv::SiftDescriptorExtractor extractor;
   
@@ -35,12 +34,15 @@ namespace sparse_batch_sfm {
   for (int i = 0; i < seq_len; i++) {
     for (int j = i + 1; j < seq_len; j++) {
       matcher.match(descriptors[i], descriptors[j], matches);
-      cv::Mat img_matches;
-      cv::drawMatches(*image_seq[i].get(), keypoints[i], *image_seq[j].get(), keypoints[j],
-               matches, img_matches, cv::Scalar::all(-1), cv::Scalar::all(-1),
-               std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-      cv::imshow("Matches", img_matches);
-      cv::waitKey(0);
+      // show matches
+      if (visualize) {
+        cv::Mat img_matches;
+        cv::drawMatches(*image_seq[i].get(), keypoints[i], *image_seq[j].get(), keypoints[j],
+                        matches, img_matches, cv::Scalar::all(-1), cv::Scalar::all(-1),
+                        std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+        cv::imshow("Matches", img_matches);
+        cv::waitKey(0);
+      }
     }
   }
   

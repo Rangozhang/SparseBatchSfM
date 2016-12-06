@@ -15,7 +15,7 @@ class FeatureProcessor {
   explicit FeatureProcessor();
   virtual ~FeatureProcessor();
   // or extractMatch()? put those two in the same function
-  bool feature_match(const std::vector<std::unique_ptr<cv::Mat>>& image_seq, FeatureStruct& feature_struct); 
+  bool feature_match(const std::vector<std::unique_ptr<cv::Mat>>& image_seq, FeatureStruct& feature_struct, int minHessian, bool visualize); 
   bool skeletonize(Eigen::SparseMatrix<int, Eigen::RowMajor>& skeleton);
 };
 
