@@ -41,11 +41,14 @@ namespace sparse_batch_sfm {
   for (int i = 0; i < seq_len; i++) {
     for (int j = i + 1; j < seq_len; j++) {
       matcher.match(descriptors[i], descriptors[j], matches);
+      // count the number of good matches
       std::vector<cv::DMatch> good_matches;
       int count = 0;
       for(int n = 1; n < matches.size(); n++) {
         if(matches[n].distance < match_thres) {
-          good_matches.push_back(matches[n]);
+          if (visualize) {
+            good_matches.push_back(matches[n]);
+          }
           count++;
         }
       }
