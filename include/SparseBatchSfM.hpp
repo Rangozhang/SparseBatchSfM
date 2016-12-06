@@ -24,11 +24,13 @@ class SparseBatchSfM {
   // input images
   std::unique_ptr<ImageCapture> image_capture_;
   std::unique_ptr<FeatureProcessor> feature_processor_;
+  std::unique_ptr<TwoViewReconstruction> twoview_reconstruction_;
 
  private:
   // input video sequence
   std::vector<std::unique_ptr<cv::Mat>> image_seq_;
   FeatureStruct feature_struct_;
+  std::vector<GraphStruct> graphs_;
 };
 
 } // namespace sparse_batch_sfm

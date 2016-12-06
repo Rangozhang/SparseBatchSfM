@@ -8,11 +8,13 @@ namespace sparse_batch_sfm {
   SparseBatchSfM::SparseBatchSfM() {
     image_capture_.reset(new ImageCapture());
     feature_processor_.reset(new FeatureProcessor());
+    twoview_reconstruction_.reset(new TwoViewReconstruction());
   }
 
   SparseBatchSfM::~SparseBatchSfM() {
     image_capture_.reset(); 
     feature_processor_.reset();
+    twoview_reconstruction_.reset();
   }
 
   SparseBatchSfM* SparseBatchSfM::instance_ = nullptr;
