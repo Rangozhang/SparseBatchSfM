@@ -1,3 +1,4 @@
+#include <unordered_set>
 #include <unordered_map>
 
 #include "FeatureProcessor.hpp"
@@ -103,14 +104,141 @@ namespace sparse_batch_sfm {
 
   }
 
-  for(int n = 0; n < triplet.size(); n++)
-    std::cout << triplet[n].row() << ' ' << triplet[n].col() << ' ' << triplet[n].value() << std::endl;
+//  for(int n = 0; n < triplet.size(); n++)
+//    std::cout << triplet[n].row() << ' ' << triplet[n].col() << ' ' << triplet[n].value() << std::endl;
  
   return true;
   }
 
-  bool FeatureProcessor::skeletonize(Eigen::Matrix<int, Eigen::Dynamic,
-                                     Eigen::Dynamic, Eigen::RowMajor>& skeleton) {
-
+  inline void print_unordered_set(const std::unordered_set<int>& mset) {
+    for (const auto& ele : mset) {
+        std::cout << " " << ele;
+    }
+    std::cout << std::endl;
+    return;
   }
+
+  bool FeatureProcessor::skeletonize(Eigen::Matrix<int, Eigen::Dynamic,
+                                     Eigen::Dynamic, Eigen::RowMajor>& skeleton, float min_n_matches=20) {
+    int len = skeleton.rows();
+    bool verbose = false;
+    Eigen::MatrixXi mask(len, len);
+    mask.setZero();
+    auto bin_mat_ = (skeleton.array() > min_n_matches); // readonly... XD
+    Eigen::MatrixXi bin_mat(len, len);
+    for (int i = 0; i < len; ++i) {
+      for (int j = 0; j < len; ++j) {
+        bin_mat(i, j) = bin_mat_(i, j);
+      }
+    }
+    if (verbose) {
+      std::cout << "binary adjacent matrix: " << std::endl
+                << bin_mat << std::endl << std::endl;
+    }
+    std::unordered_set<int> picked;
+    std::unordered_set<int> candidate;
+
+    int init_ind = -1, pre_ind = -1;
+    double init_val = bin_mat.rowwise().sum().col(0).maxCoeff(&init_ind);
+    if (verbose) {
+      std::cout << "init_val: " << init_val << " init_ind: " << init_ind << std::endl;
+    }
+    if (init_ind < 0) {
+      return false;
+    }
+    picked.insert(init_ind);
+    pre_ind = init_ind;
+    bin_mat.col(pre_ind).setZero();
+    int cur_ind = -1;
+
+    // CDS
+    do {
+      // 1. Push neighbors in to candidate
+      if (verbose) {
+        std::cout << "Status: " << std::endl;
+        std::cout << "bin_mat: " << std::endl << bin_mat << std::endl;
+        std::cout << "pre_ind: " << pre_ind << std::endl;
+        std::cout << "cur_ind: " << cur_ind << std::endl;
+        std::cout << "picked: "; print_unordered_set(picked);
+        std::cout << "candidate: "; print_unordered_set(candidate);
+        std::cout << "mask: " << std::endl << mask << std::endl;
+        std::cout << std::endl;
+      }
+      for (int i = 0; i < len; ++i) {
+        // continue if diagonal / value=0 / in picked set
+        if (i == pre_ind || !bin_mat(pre_ind, i)) {
+          continue;
+        }
+        candidate.insert(i);
+        bin_mat.col(i).setZero();
+      }
+      
+      // 2. push cur_ind to picked from candidate
+      cur_ind = -1;
+      double cur_val = 0;
+      for (const int& ele : candidate) {
+        int n_lin = bin_mat.rowwise().sum()(ele);
+        if (cur_val < n_lin) {
+          cur_ind = ele;
+          cur_val = n_lin;
+        }
+      }
+      if (cur_ind == -1) {
+          break;
+      }
+      candidate.erase(cur_ind);
+      picked.insert(cur_ind);
+      
+      // 3. store edge in mask
+      mask(pre_ind, cur_ind) = 1;
+      mask(cur_ind, pre_ind) = 1;
+
+      // 4. set cur_ind to pre_ind
+      pre_ind = cur_ind;
+      if (verbose) {
+        std::cout << "Status: " << std::endl;
+        std::cout << "bin_mat: " << std::endl << bin_mat << std::endl;
+        std::cout << "pre_ind: " << pre_ind;
+        std::cout << "cur_ind: " << cur_ind;
+        std::cout << "picked: "; print_unordered_set(picked);
+        std::cout << "candidate: "; print_unordered_set(candidate);
+        std::cout << "mask: " << std::endl << mask << std::endl;
+        std::cout << std::endl;
+      }
+ 
+    } while (!candidate.empty());
+
+    // adding leaves
+    for (int i = 0; i < len; ++i) {
+      if (picked.count(i)) continue;
+      int cds_ind = -1;
+      int con_weight = 0;
+      for (const int& ele : picked) {
+        int cur_w = skeleton(ele, i);
+        if (cur_w > con_weight) {
+          cds_ind = ele;
+          con_weight = cur_w;
+        }
+      }
+      if (cds_ind == -1) continue;
+      mask(i, cds_ind) = 1;
+      mask(cds_ind, i) = 1;
+    }
+
+    skeleton = skeleton.cwiseProduct(mask);
+
+    if (verbose) {
+      std::cout << "Status: " << std::endl;
+      std::cout << "bin_mat: " << std::endl << bin_mat << std::endl;
+      std::cout << "pre_ind: " << pre_ind;
+      std::cout << "cur_ind: " << cur_ind;
+      std::cout << "picked: "; print_unordered_set(picked);
+      std::cout << "candidate: "; print_unordered_set(candidate);
+      std::cout << "mask: " << std::endl << mask << std::endl;
+      std::cout << std::endl;
+    }
+ 
+    return true;
+  }
+  
 }
