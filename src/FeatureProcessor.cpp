@@ -8,14 +8,22 @@
 #include "opencv2/nonfree/features2d.hpp"
 
 namespace sparse_batch_sfm {
-  bool FeatureProcessor::feature_match(const std::vector<std::unique_ptr<cv::Mat>>& image_seq, FeatureStruct& feature_struct, int minHessian = 400, bool visualize = false) {
+  bool FeatureProcessor::feature_match(const std::vector<std::unique_ptr<cv::Mat>>& image_seq, 
+                                       FeatureStruct& feature_struct, 
+                                       int minHessian = 400, float match_thres = 200, bool visualize = false) {
+
+  // feature_struct initializtion
+  int seq_len = image_seq.size();
+  feature_struct.skeleton.resize(seq_len, seq_len);
+  for (int i = 0; i < seq_len; i++) {
+    feature_struct.skeleton(i, i) = 0;
+  }
   
   // SIFT detector and extractor
   cv::SiftFeatureDetector detector(minHessian);
   cv::SiftDescriptorExtractor extractor;
   
   // detect keypoints and extract features for all images
-  int seq_len = image_seq.size();
   std::vector<std::vector<cv::KeyPoint>> keypoints;
   std::vector<cv::Mat> descriptors;
   for (int i = 0; i < seq_len; i++) {
@@ -28,17 +36,27 @@ namespace sparse_batch_sfm {
   }
 
   // match features between each pair of images
-  float thres = 200;
   cv::FlannBasedMatcher matcher;
   std::vector<cv::DMatch> matches;
   for (int i = 0; i < seq_len; i++) {
     for (int j = i + 1; j < seq_len; j++) {
       matcher.match(descriptors[i], descriptors[j], matches);
+      std::vector<cv::DMatch> good_matches;
+      int count = 0;
+      for(int n = 1; n < matches.size(); n++) {
+        if(matches[n].distance < match_thres) {
+          good_matches.push_back(matches[n]);
+          count++;
+        }
+      }
+      feature_struct.skeleton(i,j) = count;
+      feature_struct.skeleton(j,i) = count;
+      //std::cout << matches[n].imgIdx << ' ' << matches[n].trainIdx << ' ' << matches[n].queryIdx << ' ' << matches[n].distance << std::endl;
       // show matches
       if (visualize) {
         cv::Mat img_matches;
         cv::drawMatches(*image_seq[i].get(), keypoints[i], *image_seq[j].get(), keypoints[j],
-                        matches, img_matches, cv::Scalar::all(-1), cv::Scalar::all(-1),
+                        good_matches, img_matches, cv::Scalar::all(-1), cv::Scalar::all(-1),
                         std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
         cv::imshow("Matches", img_matches);
         cv::waitKey(0);
