@@ -36,7 +36,7 @@ namespace sparse_batch_sfm {
     int seq_len = controller->image_seq_.size();
     
     controller->feature_processor_->feature_match(controller->image_seq_, controller->feature_struct_, 400, 200, false);
-    // std::cout << controller->feature_struct_.skeleton << std::endl;
+    // std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
     // controller->feature_struct_.skeleton.resize(8, 8);
     // controller->feature_struct_.skeleton << 0, 1, 0, 10, 0, 0, 0, 0,
     //                                         1, 0, 10, 0, 3, 0, 0, 0,
@@ -47,6 +47,7 @@ namespace sparse_batch_sfm {
     //                                         0,  0, 0, 0, 0, 7, 0, 5,
     //                                         0,  0, 0, 0, 0, 8, 5, 0;
     controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 20);
+    // std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
   }
 
 } // namespace sparse_batch_sfm

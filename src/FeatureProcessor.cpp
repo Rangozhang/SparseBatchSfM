@@ -185,6 +185,8 @@ namespace sparse_batch_sfm {
       mask(cds_ind, i) = 1;
     }
 
+    skeleton = skeleton.cwiseProduct(mask);
+
     if (verbose) {
       std::cout << "Status: " << std::endl;
       std::cout << "bin_mat: " << std::endl << bin_mat << std::endl;
