@@ -2,10 +2,31 @@
 #define SPARSEBATCHSFM_CPP_
 
 #include <fstream>
+#include <unordered_set>
 
 #include "SparseBatchSfM.hpp"
 
 namespace sparse_batch_sfm {
+namespace {
+  struct Edge {
+    int idx1, idx2;
+    int weight;
+    Edge(int idx1, int idx2, int weight):idx1(idx1), idx2(idx2), weight(weight) {};
+  };
+  void convertToVectors(const Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& sk,
+                        std::vector<Edge>& edges) {
+    int len = sk.rows();
+    for (int i = 0; i < len; ++i) {
+      for (int j = i+1; j < len; ++j) {
+        if (!sk(i, j)) continue;
+        edges.push_back(Edge(i, j, sk(i, j)));
+      }
+    }
+    std::sort(edges.begin(), edges.end(),
+            [](const Edge& edge1, const Edge& edge2){return edge1.weight > edge2.weight;});
+    return;
+  }
+}
 
   SparseBatchSfM::SparseBatchSfM() {
     image_capture_.reset(new ImageCapture());
@@ -63,6 +84,8 @@ namespace sparse_batch_sfm {
     std::cout << "INPUT PARAMS" << std::endl;
     std::cout << "Input path: " << input_path << std::endl;
     SparseBatchSfM* controller = controller->getInstance();
+
+    /************** Read images from Dir ***************/
     if (!controller->image_capture_->ReadFromDir(
                   input_path, controller->image_seq_)) {
       return;
@@ -70,6 +93,8 @@ namespace sparse_batch_sfm {
 
     int seq_len = controller->image_seq_.size();
     
+    /************** Processing feature ***************/
+
     controller->feature_processor_->feature_match(controller->image_seq_, controller->feature_struct_, 400, 200, false);
     // std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
     // controller->feature_struct_.skeleton.resize(8, 8);
@@ -81,8 +106,43 @@ namespace sparse_batch_sfm {
     //                                         0,  0, 0, 7, 6, 0, 7, 8,
     //                                         0,  0, 0, 0, 0, 7, 0, 5,
     //                                         0,  0, 0, 0, 0, 8, 5, 0;
-    controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 20);
+    // controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 0);
     // std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
+    controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 20);
+
+    std::vector<Edge> edges = {};
+    convertToVectors(controller->feature_struct_.skeleton, edges);
+    if (!edges.size()) {
+      return;
+    }
+    // for (const auto& edge : edges) {
+    //     std::cout << edge.idx1 << ' ' << edge.idx2 << ' ' << edge.weight << std::endl;
+    // }
+
+    /****** Twoview Reconstruction along the skeleton ******/
+    for (const auto& edge : edges) {
+        // Get intrinsic matrix
+        Eigen::Matrix3d K1 = Eigen::Matrix3d::Identity();
+        Eigen::Matrix3d K2 = Eigen::Matrix3d::Identity();
+        // twoview reconstruction for each edge
+        std::unique_ptr<GraphStruct> graph;
+        graph.reset(new GraphStruct());
+        if (!controller->twoview_reconstruction_->reconstruct(controller->feature_struct_,
+                                                         edge.idx1, edge.idx2,
+                                                         K1, K2, graph)) {
+            std::cerr << "Failed to twoview reconstruct" << std::endl;
+        }
+        // BundleAdjustment
+        
+        graphs_.push_back(std::move(graph));
+    }
+
+    /****** Merge graphs ******/
+    unordered_set<int> visited_frames = {};
+    while (graphs_.size() > 1) {
+       
+    }
+
   }
 
 } // namespace sparse_batch_sfm
