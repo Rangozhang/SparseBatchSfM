@@ -11,8 +11,6 @@ add_library(Util ${inc}/utils.hpp ${src}/utils.cpp)
 
 add_library(ImageCapture ${inc}/ImageCapture.hpp ${src}/ImageCapture.cpp)
 
-add_library(SparseBatchSfM ${inc}/SparseBatchSfM.hpp ${src}/SparseBatchSfM.cpp)
-
 add_library(Protos ${inc}/protos.hpp)
 set_target_properties(Protos PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -20,6 +18,8 @@ add_library(FEATUREPROCESSOR ${inc}/FeatureProcessor.hpp ${src}/FeatureProcessor
 #target_link_libraries(FEATUREPROCESSOR Protos)
 
 add_library(TWOVIEWRECONSTRUCTION ${inc}/TwoViewReconstruction.hpp ${src}/TwoViewReconstruction.cpp)
+
+add_library(SparseBatchSfM ${inc}/SparseBatchSfM.hpp ${src}/SparseBatchSfM.cpp)
 
 add_executable(main ${src}/main.cpp)
 target_link_libraries(main ${OpenCV_LIBS} SparseBatchSfM ImageCapture Util Protos FEATUREPROCESSOR)
