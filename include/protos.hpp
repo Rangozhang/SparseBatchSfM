@@ -11,9 +11,14 @@ struct FeaturePoint {
 
 struct FeatureStruct {
   std::vector<std::vector<FeaturePoint>> feature_point;
-  std::vector<std::vector<Eigen::SparseMatrix<int, Eigen::RowMajor>>> feature_idx;
+  std::vector<std::vector<Eigen::Triplet<double>>> feature_matches;
   Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> skeleton;
 };
+
+struct NviewRelationStruct {
+  std::vector<FeaturePoint> points;
+  Eigen::SparseMatrix<int, Eigen::RowMajor> releation_idx;
+}
 
 struct GraphStruct {
   std::vector<int> frame_idx;
