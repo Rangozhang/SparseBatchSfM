@@ -34,6 +34,16 @@ namespace sparse_batch_sfm {
     extractor.compute(*image_seq[i].get(), this_keypoint, this_descriptor);
     keypoints.push_back(this_keypoint);
     descriptors.push_back(this_descriptor);
+    std::vector<FeaturePoint> features;
+    for (int n = 0; n < this_keypoint.size(); n++) {
+      FeaturePoint feature_point;
+      cv::Point2f pos = keypoints[i][n].pt;
+      feature_point.pos = Eigen::Vector2d(pos.x, pos.y);
+      cv::Vec3i rgb = image_seq[i].get()->at<cv::Vec3b>(round(feature_point.pos[1]), round(feature_point.pos[0]));
+      feature_point.rgb = Eigen::Vector3i(rgb[2], rgb[1], rgb[0]);
+      features.push_back(feature_point);
+    }
+    feature_struct.feature_point.push_back(features);
   }
 
   // match features between each pair of images
@@ -43,17 +53,20 @@ namespace sparse_batch_sfm {
   std::vector<cv::DMatch> matches;
   int count_point = 0;
   for (int i = 0; i < seq_len; i++) {
-    for (int j = i + 1; j < seq_len; j++) {
-      matcher.match(descriptors[i], descriptors[j], matches);
-      // count the number of good matches
-      std::vector<cv::DMatch> good_matches;
-      int count = 0;
-      for(int n = 1; n < matches.size(); n++) {
-        if(matches[n].distance < match_thres) {
-          if (visualize) {
+    std::vector<std::vector<Eigen::Triplet<double>>> this_match;
+    for (int j = 0; j < seq_len; j++) {
+      std::vector<Eigen::Triplet<double>> this_this_match;
+      if (j > i) {
+        matcher.match(descriptors[i], descriptors[j], matches);
+        // count the number of good matches
+        std::vector<cv::DMatch> good_matches;
+        int count = 0;
+        for(int n = 1; n < matches.size(); n++) {
+          if(matches[n].distance < match_thres) {
+            this_this_match.push_back(Eigen::Triplet<double>(matches[n].queryIdx, matches[n].trainIdx));
             good_matches.push_back(matches[n]);
-          }
-          count++;
+            count++;
+/*
           std::unordered_map<int, int>::const_iterator got_i = hash[i].find(matches[n].queryIdx);
           if (got_i == hash[i].end()) {
             FeaturePoint feature_point;
@@ -87,19 +100,22 @@ namespace sparse_batch_sfm {
           else if(got_i != hash[i].end() && got_j == hash[j].end()) {
             //
           }
+*/
+          }
+        }
+        feature_struct.skeleton(i, j) = count;
+        feature_struct.skeleton(j, i) = count;
+        // show matches
+        if (visualize) {
+          cv::Mat img_matches;
+          cv::drawMatches(*image_seq[i].get(), keypoints[i], *image_seq[j].get(), keypoints[j],
+                          good_matches, img_matches, cv::Scalar::all(-1), cv::Scalar::all(-1),
+                          std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+          cv::imshow("Matches", img_matches);
+          cv::waitKey(0);
         }
       }
-      feature_struct.skeleton(i, j) = count;
-      feature_struct.skeleton(j, i) = count;
-      // show matches
-      if (visualize) {
-        cv::Mat img_matches;
-        cv::drawMatches(*image_seq[i].get(), keypoints[i], *image_seq[j].get(), keypoints[j],
-                        good_matches, img_matches, cv::Scalar::all(-1), cv::Scalar::all(-1),
-                        std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-        cv::imshow("Matches", img_matches);
-        cv::waitKey(0);
-      }
+      this_match.push_back(this_this_match);
     }
 
   }

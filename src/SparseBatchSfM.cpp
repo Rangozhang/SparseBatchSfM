@@ -108,7 +108,15 @@ namespace {
     /************** Processing feature ***************/
     std::cout << "Feature processing" << std::endl;
     controller->feature_processor_->feature_match(controller->image_seq_, controller->feature_struct_, 400, 200, false);
-    // std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
+    for(int i = 0; i < seq_len; i++) {
+      std::cout << controller->feature_struct_.feature_point[i].size() << std::endl;
+      std::cout << controller->feature_struct_.feature_point[i][0].pos << std::endl;
+      for(int j = 0; j < seq_len; j++) {
+        std::cout << controller->feature_struct_.feature_matches[i][j].size() << std::endl;
+        std::cout << controller->feature_struct_.feature_matches[i][j][0] << std::endl;
+      }
+    }
+     std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
     // controller->feature_struct_.skeleton.resize(8, 8);
     // controller->feature_struct_.skeleton << 0, 1, 0, 10, 0, 0, 0, 0,
     //                                         1, 0, 10, 0, 3, 0, 0, 0,
