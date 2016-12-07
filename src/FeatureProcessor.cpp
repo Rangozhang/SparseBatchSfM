@@ -117,7 +117,7 @@ namespace sparse_batch_sfm {
       }
       this_match.push_back(this_this_match);
     }
-
+    feature_struct.feature_matches.push_back(this_match);
   }
 
 //  for(int n = 0; n < triplet.size(); n++)
