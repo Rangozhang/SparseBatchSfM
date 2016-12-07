@@ -142,7 +142,7 @@ namespace {
     /****** Twoview Reconstruction along the skeleton ******/
     std::cout << "Two view Reconstruction" << std::endl;
     for (const auto& edge : edges) {
-        // Get intrinsic matrix
+        // Get intrinsic matrix TODO: Change to real K
         Eigen::Matrix3d K1 = Eigen::Matrix3d::Identity();
         Eigen::Matrix3d K2 = Eigen::Matrix3d::Identity();
         // twoview reconstruction for each edge
