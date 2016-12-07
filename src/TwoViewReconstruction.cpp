@@ -72,9 +72,9 @@ namespace {
     cv::cv2eigen(f_mat, F_);
 
     // Get rid of outliers from ransacF
-    for (int i = 0; i < mask.rows; ++i) {
-      
-    }
+    // for (int i = 0; i < mask.rows; ++i) {
+    //    
+    // }
 
     if (DEBUG) {
    	  /* draw epolir line */
