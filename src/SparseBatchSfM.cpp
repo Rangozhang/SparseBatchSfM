@@ -102,6 +102,8 @@ namespace {
     }
 
     int seq_len = controller->image_seq_.size();
+    int img_width = controller->image_seq_[0]->cols;
+    int img_height = controller->image_seq_[0]->rows;
     
     /************** Processing feature ***************/
     std::cout << "Feature processing" << std::endl;
@@ -139,11 +141,12 @@ namespace {
         std::unique_ptr<GraphStruct> graph;
         graph.reset(new GraphStruct());
         if (!controller->twoview_reconstruction_->reconstruct(controller->feature_struct_,
-                                                         edge.idx1, edge.idx2,
-                                                         K1, K2, *graph.get())) {
+                                                         edge.idx1, edge.idx2, img_width, img_height,
+                                                         K1, K2, *graph.get(), *controller->image_seq_[edge.idx1].get(), *controller->image_seq_[edge.idx2].get())) {
             std::cerr << "Failed to twoview reconstruct" << std::endl;
             return;
         }
+
         // BundleAdjustment
         
         controller->graphs_.push_back(std::move(graph));

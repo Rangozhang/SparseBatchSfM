@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <opencv2/core/core.hpp>
 
 #include "protos.hpp"
 
@@ -15,28 +16,29 @@ namespace sparse_batch_sfm {
 
 class TwoViewReconstruction {
  private:
-  Eigen::Matrix<double, 3, 3, Eigen::ColMajor> F;
-  Eigen::Matrix<double, 3, 3, Eigen::ColMajor> E;
+  Eigen::Matrix3d F_;
+  Eigen::Matrix3d E_;
   
   void printE() {
     std::cout << "Essential Matrix: " << std::endl
-        << E << std::endl << std::endl;
+        << E_ << std::endl << std::endl;
   };
 
   void printF() {
     std::cout << "Fundamental Matrix: " << std::endl
-        << F << std::endl << std::endl;
+        << F_ << std::endl << std::endl;
   };
 
-  bool estimateF(const std::vector<FeaturePoint>& feature_point,
-                 const Eigen::SparseMatrix<int, Eigen::RowMajor>& feature_idx, int frame1, int frame2);
+  bool estimateF(const FeatureStruct& feature_struct,
+                 int frame1, int frame2,
+                 int img_width, int img_height, const cv::Mat& img1, const cv::Mat& img2);
   Eigen::Matrix<double, 3, 4, Eigen::ColMajor> RtFromE(const Eigen::Matrix3d& K1, const Eigen::Matrix3d& K2,
-                                                        const std::vector<FeaturePoint>& feature_point,
-                                                        const Eigen::SparseMatrix<int, Eigen::RowMajor> feature_idx);
+                                                       const FeatureStruct& feature_struct,
+                                                       int frame1, int frame2);
   bool triangulate(GraphStruct& graph);
  public:
-  bool reconstruct(const FeatureStruct& feature_struct, int frame1, int frame2,
-                   Eigen::Matrix3d K1, Eigen::Matrix3d K2, GraphStruct& graph);
+  bool reconstruct(const FeatureStruct& feature_struct, int frame1, int frame2, int img_width, int img_height,
+                   Eigen::Matrix3d K1, Eigen::Matrix3d K2, GraphStruct& graph, const cv::Mat& img1, const cv::Mat& img2);
 };
 
 } // namespace sparse_batch_sfm

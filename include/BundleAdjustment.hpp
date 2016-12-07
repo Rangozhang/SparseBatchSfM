@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "protos.hpp"
+// #include "ceres/"
 
 namespace sparse_batch_sfm {
 
@@ -62,7 +63,7 @@ struct SnavelyReprojectionError {
 
 class BundleAdjustment {
  public:
-  bool bundleAdjustment()
+  bool bundleAdjustment(GraphStruct& )
 };
 
 } // namespace sparse_batch_sfm
