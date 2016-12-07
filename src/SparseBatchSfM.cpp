@@ -26,6 +26,16 @@ namespace {
             [](const Edge& edge1, const Edge& edge2){return edge1.weight > edge2.weight;});
     return;
   }
+  
+  bool hasIdxInHashSet(const std::vector<int>& frame_idx,
+                       const std::unordered_set<int>& visited_frames) {
+    for (const auto& frame : frame_idx) {
+      if (visited_frames.count(frame)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
   SparseBatchSfM::SparseBatchSfM() {
@@ -94,7 +104,7 @@ namespace {
     int seq_len = controller->image_seq_.size();
     
     /************** Processing feature ***************/
-
+    std::cout << "Feature processing" << std::endl;
     controller->feature_processor_->feature_match(controller->image_seq_, controller->feature_struct_, 400, 200, false);
     // std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
     // controller->feature_struct_.skeleton.resize(8, 8);
@@ -120,6 +130,7 @@ namespace {
     // }
 
     /****** Twoview Reconstruction along the skeleton ******/
+    std::cout << "Two view Reconstruction" << std::endl;
     for (const auto& edge : edges) {
         // Get intrinsic matrix
         Eigen::Matrix3d K1 = Eigen::Matrix3d::Identity();
@@ -129,20 +140,49 @@ namespace {
         graph.reset(new GraphStruct());
         if (!controller->twoview_reconstruction_->reconstruct(controller->feature_struct_,
                                                          edge.idx1, edge.idx2,
-                                                         K1, K2, graph)) {
+                                                         K1, K2, *graph.get())) {
             std::cerr << "Failed to twoview reconstruct" << std::endl;
+            return;
         }
         // BundleAdjustment
         
-        graphs_.push_back(std::move(graph));
+        controller->graphs_.push_back(std::move(graph));
     }
+    
 
     /****** Merge graphs ******/
-    unordered_set<int> visited_frames = {};
-    while (graphs_.size() > 1) {
-       
+    std::cout << "Merge Graphs" << std::endl;
+    std::unordered_set<int> visited_frames;
+    for (const auto& idx : controller->graphs_[0]->frame_idx) {
+      visited_frames.insert(idx);
+    }
+    while (controller->graphs_.size() > 1) {
+      int ind = 1;
+      for (int i = 1; i < controller->graphs_.size(); ++i) {
+        if (hasIdxInHashSet(controller->graphs_[i]->frame_idx, visited_frames)) {
+          ind = i;
+          break;
+        }
+      }
+
+      // merge the second one to the first one
+      // merge(graphs_[0], graphs_[ind]);
+
+      // bundleadjustment(graphs_[0]);
+      
+      // put the new vertex in to hash set
+      for (const auto& frame_idx : controller->graphs_[ind]->frame_idx) {
+        visited_frames.insert(frame_idx);
+      }
+
+      controller->graphs_.erase(controller->graphs_.begin() + ind);
     }
 
+    if (!controller->writeGraphToPLYFile(controller->graphs_, "./result.ply")) {
+      std::cerr << "Can not write the structure to .ply file.";
+    }
+
+    return;
   }
 
 } // namespace sparse_batch_sfm

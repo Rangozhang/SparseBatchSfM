@@ -29,7 +29,7 @@ class TwoViewReconstruction {
   };
 
   bool estimateF(const std::vector<FeaturePoint>& feature_point,
-                               const Eigen::SparseMatrix<int, Eigen::RowMajor>& feature_idx);
+                 const Eigen::SparseMatrix<int, Eigen::RowMajor>& feature_idx, int frame1, int frame2);
   Eigen::Matrix<double, 3, 4, Eigen::ColMajor> RtFromE(const Eigen::Matrix3d& K1, const Eigen::Matrix3d& K2,
                                                         const std::vector<FeaturePoint>& feature_point,
                                                         const Eigen::SparseMatrix<int, Eigen::RowMajor> feature_idx);

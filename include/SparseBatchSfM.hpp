@@ -18,7 +18,7 @@ class SparseBatchSfM {
 
   static SparseBatchSfM* getInstance();
   static void run(const std::string& input_path);
-  static bool writeGraphToPLYFile(const std::vector<std::unique_ptr<GraphStruct>>& graphs,
+  bool writeGraphToPLYFile(const std::vector<std::unique_ptr<GraphStruct>>& graphs,
                                   const char* filename);
 
  private:
