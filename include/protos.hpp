@@ -10,8 +10,8 @@ struct FeaturePoint {
 };
 
 struct FeatureStruct {
-  std::vector<FeaturePoint> feature_point;
-  Eigen::SparseMatrix<int, Eigen::RowMajor> feature_idx;
+  std::vector<std::vector<FeaturePoint>> feature_point;
+  std::vector<std::vector<Eigen::SparseMatrix<int, Eigen::RowMajor>>> feature_idx;
   Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> skeleton;
 };
 
