@@ -1,5 +1,7 @@
 #include "TwoViewReconstruction.hpp"
 
+#include <unordered_set>
+
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/features2d/features2d.hpp>
@@ -43,25 +45,21 @@ namespace {
   bool TwoViewReconstruction::estimateF(const FeatureStruct& feature_struct,
                                         int frame1, int frame2, int img_width, int img_height, const cv::Mat& img1, const cv::Mat& img2) {
     std::vector<cv::Point2f> pts1, pts2;
-    // for (int i = 0; i < feature_struct.feature_idx.cols(); ++i) {
     for (int i = 0; i < feature_struct.feature_matches[frame1][frame2].size(); ++i) {
-      // if (feature_struct.feature_idx.coeff(frame1, i) && feature_struct.feature_idx.coeff(frame2, i)) {
-        cv::Point2f tmp_pt;
-        // tmp_pt.x = feature_struct.feature_point[feature_struct.feature_idx.coeff(frame1, i)].pos(1);
-        int frame1_pt_ind = feature_struct.feature_matches[frame1][frame2][i].row();
-        tmp_pt.x = feature_struct.feature_point[frame1][frame1_pt_ind].pos(0);
-        tmp_pt.y = feature_struct.feature_point[frame1][frame1_pt_ind].pos(1);
-        tmp_pt.x /= img_width + 0.0;
-        tmp_pt.y /= img_height + 0.0;
-        pts1.push_back(tmp_pt);
+      cv::Point2f tmp_pt;
+      int frame1_pt_ind = feature_struct.feature_matches[frame1][frame2][i].row();
+      tmp_pt.x = feature_struct.feature_point[frame1][frame1_pt_ind].pos(0);
+      tmp_pt.y = feature_struct.feature_point[frame1][frame1_pt_ind].pos(1);
+      tmp_pt.x /= img_width + 0.0;
+      tmp_pt.y /= img_height + 0.0;
+      pts1.push_back(tmp_pt);
 
-        int frame2_pt_ind = feature_struct.feature_matches[frame1][frame2][i].col();
-        tmp_pt.x = feature_struct.feature_point[frame2][frame2_pt_ind].pos(0);
-        tmp_pt.y = feature_struct.feature_point[frame2][frame2_pt_ind].pos(1);
-        tmp_pt.x /= img_width + 0.0;
-        tmp_pt.y /= img_height + 0.0;
-        pts2.push_back(tmp_pt);
-      // }
+      int frame2_pt_ind = feature_struct.feature_matches[frame1][frame2][i].col();
+      tmp_pt.x = feature_struct.feature_point[frame2][frame2_pt_ind].pos(0);
+      tmp_pt.y = feature_struct.feature_point[frame2][frame2_pt_ind].pos(1);
+      tmp_pt.x /= img_width + 0.0;
+      tmp_pt.y /= img_height + 0.0;
+      pts2.push_back(tmp_pt);
     }
 
     cv::Mat scale = cv::Mat::zeros(3, 3, CV_64FC1);
@@ -75,10 +73,24 @@ namespace {
 
     cv::cv2eigen(f_mat, F_);
 
+    // std::vector<Eigen::Triplet<double>> two_img_match;
+    std::unordered_set<int> kept_fp_ind1, kept_fp_ind2;
+    std::vector<std::vector<FeaturePoint>> new_fp1, new_fp2;
+
     // Get rid of outliers from ransacF
-    // for (int i = 0; i < mask.rows; ++i) {
-    //    
-    // }
+    for (int i = mask.rows-1; i >= 0; --i) {
+      if (mask.at<char>(i, 0) != 0) {
+        
+      } 
+    }
+
+    for (int i = 0; i < feature_struct.feature_point[frame1].size(); ++i) {
+    
+    }
+
+    for (int i = 0; i < feature_struct.feature_point[frame2].size(); ++i) {
+    
+    }
 
     if (DEBUG) {
    	  /* draw epolir line */
