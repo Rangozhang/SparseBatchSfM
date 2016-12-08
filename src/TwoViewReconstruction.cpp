@@ -103,7 +103,7 @@ namespace {
         count ++;
       }
     }
-    
+
     std::cout << count << " out of " << mask.rows << " inliers"<< std::endl;
 
     if (DEBUG) {
@@ -111,10 +111,10 @@ namespace {
       using namespace cv;
       // scale back
       for (int i = 0; i < mask.rows; i++) {
-	    pts1[i].x *= img_width; 
-        pts1[i].y *= img_height; 
-        pts2[i].x *= img_width; 
-        pts2[i].y *= img_height; 
+	    pts1[i].x *= img_width;
+        pts1[i].y *= img_height;
+        pts2[i].x *= img_width;
+        pts2[i].y *= img_height;
       }
       cv::Mat Epilines;
 	  cv::computeCorrespondEpilines(Mat(pts1),1,f_mat,Epilines);
@@ -164,7 +164,7 @@ namespace {
       std::cout << "Prepare to show..." << std::endl;
 	  drawKeypoints( Epilines_show, pts2_kp, Epilines_show_pts, Scalar::all(-1), DrawMatchesFlags::DEFAULT );
 	  imshow("Epilines_show",Epilines_show_pts);
-	  waitKey(0);   
+	  waitKey(0);
     }
 
     return true;
@@ -212,7 +212,23 @@ namespace {
     mot_candidate[3] << R2, t2;
 
     // 2. Find the best one with most inliers by triangulation
-
+    int count, max_count = 0, max_idx = -1;
+    for (int i = 0; i < 4; i++) {
+      Eigen::Matrix<double, 6, Eigen::Dynamic> Str;
+      triangulate(K1, K2, mot_candidate[i], feature_struct, frame1, frame2, Str);
+      int count = 0;
+      for (int n = 0; n < Str.cols(); n++) {
+        if ((mot_candidate[i].block(2,0,1,3) * (Str.block(0,n,3,1) - mot_candidate[i].block(0,3,3,1)))(0,0) > 0 && Str(2,n) > 0) {
+          count++;
+        }
+      }
+      std::cout << "candidate " << i << ": inliers " << count << "/" << Str.cols() << std::endl;
+      if (count > max_count) {
+        max_idx = i;
+      }
+    }
+    std::cout << "candidate " << max_idx << " selected" << std::endl;
+    Mot = mot_candidate[max_idx];
     return Mot;
   }
 
