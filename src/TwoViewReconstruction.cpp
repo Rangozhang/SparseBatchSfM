@@ -38,10 +38,16 @@ namespace {
     graph.Mot.push_back(RtFromE(graph.K[0], graph.K[1], feature_struct, frame1, frame2));
 
     // 4. Triangulation
-    // if (!triangulate(graph, feature_struct, frame1, frame2)) {
-    //   std::cout << "Failed on triangulation" << std::endl;
-    //   return false;
-    // }
+    if (!triangulate(graph.K[0], graph.K[1], graph.Mot[0], feature_struct, frame1, frame2, graph.Str)) {
+      std::cout << "Failed on triangulation" << std::endl;
+      return false;
+    }
+
+    // 5. Save graph
+    for (int i = 0; i < feature_struct.feature_matches[frame1][frame2].size(); ++i) {
+      int frame1_pt_ind = feature_struct.feature_matches[frame1][frame2][i].row();
+      FeaturePoint  = feature_struct.feature_point[frame1][frame1_pt_ind]
+    }
 
     return true;
   }
