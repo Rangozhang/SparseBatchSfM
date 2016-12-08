@@ -31,7 +31,7 @@ namespace {
             [](const Edge& edge1, const Edge& edge2){return edge1.weight > edge2.weight;});
     return;
   }
-  
+
   bool hasIdxInHashSet(const std::vector<int>& frame_idx,
                        const std::unordered_set<int>& visited_frames) {
     for (const auto& frame : frame_idx) {
@@ -50,7 +50,7 @@ namespace {
   }
 
   SparseBatchSfM::~SparseBatchSfM() {
-    image_capture_.reset(); 
+    image_capture_.reset();
     feature_processor_.reset();
     twoview_reconstruction_.reset();
   }
@@ -91,7 +91,7 @@ namespace {
     }
 
     of.close();
-    
+
     return true;
   }
 
@@ -109,7 +109,7 @@ namespace {
     int seq_len = controller->image_seq_.size();
     int img_width = controller->image_seq_[0]->cols;
     int img_height = controller->image_seq_[0]->rows;
-    
+
     /************** Processing feature ***************/
     std::cout << "Feature processing" << std::endl;
     controller->feature_processor_->feature_match(controller->image_seq_, controller->feature_struct_, 400, 200, false);
@@ -134,7 +134,7 @@ namespace {
     //                                         0,  0, 0, 0, 0, 8, 5, 0;
     // controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 0);
     // std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
-    controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 170);
+    controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 180);
 
     std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
     std::vector<Edge> edges = {};
@@ -166,10 +166,10 @@ namespace {
         }
 
         // BundleAdjustment
-        
+
         controller->graphs_.push_back(std::move(graph));
     }
-    
+
 
     /****** Merge graphs ******/
     std::cout << "Merge Graphs" << std::endl;
@@ -190,7 +190,7 @@ namespace {
       // merge(graphs_[0], graphs_[ind]);
 
       // bundleadjustment(graphs_[0]);
-      
+
       // put the new vertex in to hash set
       for (const auto& frame_idx : controller->graphs_[ind]->frame_idx) {
         visited_frames.insert(frame_idx);
