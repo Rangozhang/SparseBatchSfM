@@ -13,7 +13,7 @@
 namespace sparse_batch_sfm {
 
 namespace {
-  bool DEBUG = true;
+  bool DEBUG = false;
 }
 
   bool TwoViewReconstruction::reconstruct(FeatureStruct& feature_struct, int frame1, int frame2,
@@ -228,19 +228,19 @@ namespace {
           count++;
         }
       }
-      std::cout << "candidate " << i << ": inliers " << count << "/" << Str.cols() << std::endl;
+      // std::cout << "candidate " << i << ": inliers " << count << "/" << Str.cols() << std::endl;
       if (count > max_count) {
         max_idx = i;
       }
     }
-    std::cout << "candidate " << max_idx << " selected" << std::endl;
+    // std::cout << "candidate " << max_idx << " selected" << std::endl;
     Mot = mot_candidate[max_idx];
     return Mot;
   }
 
-  bool TwoViewReconstruction::triangulate(Eigen::Matrix3d K1, Eigen::Matrix3d K2,
-          Eigen::Matrix<double, 3, 4>& Mot, const FeatureStruct& feature_struct,
-          int frame1, int frame2, Eigen::Matrix<double, 6, Eigen::Dynamic> Str) {
+  bool TwoViewReconstruction::triangulate(const Eigen::Matrix3d& K1, const Eigen::Matrix3d& K2,
+          const Eigen::Matrix<double, 3, 4>& Mot, const FeatureStruct& feature_struct,
+          int frame1, int frame2, Eigen::Matrix<double, 6, Eigen::Dynamic>& Str) {
     // Get projection matrix for img1, img2
     Eigen::MatrixXd M1 = K1 * Eigen::MatrixXd::Identity(3, 4);
     Eigen::MatrixXd M2 = K2 * Mot;
@@ -250,10 +250,41 @@ namespace {
     cv::eigen2cv(M1, M1_cv);
     cv::eigen2cv(M2, M2_cv);
 
-    // Get point
+    // Get 2d point 
+    int matches_len = feature_struct.feature_matches[frame1][frame2].size();
+    Str.resize(6, matches_len);
+    std::vector<cv::Point2f> pts1_cv(matches_len), pts2_cv(matches_len);
+    for (int i = 0; i < matches_len; ++i) {
+      int pt_ind_1 = feature_struct.feature_matches[frame1][frame2][i].row();
+      FeaturePoint pt1 = feature_struct.feature_point[frame1][pt_ind_1];
+      pts1_cv[i].x = pt1.pos(0);
+      pts1_cv[i].y = pt1.pos(1);
+
+      int pt_ind_2 = feature_struct.feature_matches[frame1][frame2][i].col();
+      FeaturePoint pt2 = feature_struct.feature_point[frame2][pt_ind_2];
+      pts2_cv[i].x = pt2.pos(0);
+      pts2_cv[i].y = pt2.pos(1);
+
+      // use color in the first frame
+      Str(3, i) = pt1.rgb(0); // r
+      Str(4, i) = pt1.rgb(1); // g
+      Str(5, i) = pt1.rgb(2); // b
+    }
 
     // Triangulate
-    // cv::triangulatePoints()
+    cv::Mat Str_cv;
+    cv::triangulatePoints(M1_cv, M2_cv, pts1_cv, pts2_cv, Str_cv);
+    
+    Eigen::MatrixXd Str_raw;
+    cv::cv2eigen(Str_cv, Str_raw);
+
+    // Normalization
+    Eigen::MatrixXd norm_ = Str_raw.bottomRows(1).replicate(4, 1);
+    Str_raw = Str_raw.array() / norm_.array();
+
+    Str.topRows(3) = Str_raw.topRows(3);
+
+    // std::cout << Str.block(0, 0, 6, 5) << std::endl << std::endl;
     return true;
   }
 
