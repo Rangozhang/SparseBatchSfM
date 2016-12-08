@@ -7,7 +7,7 @@ namespace sparse_batch_sfm {
   bool ImageCapture::ReadFromDir(const std::string& input_path,
                    std::vector<std::unique_ptr<cv::Mat>>& image_seq) {
 
-    cv::VideoCapture sequence (input_path + "/%04d.jpg");
+    cv::VideoCapture sequence (input_path + "/templeR%04d.png");
     bool show_im = false;
 
     if (!sequence.isOpened()) {

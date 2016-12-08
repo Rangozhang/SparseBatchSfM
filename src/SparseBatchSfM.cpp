@@ -117,7 +117,7 @@ namespace {
       }
     }
     */
-    // std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
+    std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
     // controller->feature_struct_.skeleton.resize(8, 8);
     // controller->feature_struct_.skeleton << 0, 1, 0, 10, 0, 0, 0, 0,
     //                                         1, 0, 10, 0, 3, 0, 0, 0,
@@ -131,6 +131,7 @@ namespace {
     // std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
     controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 20);
 
+    std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
     std::vector<Edge> edges = {};
     convertToVectors(controller->feature_struct_.skeleton, edges);
     if (!edges.size()) {
@@ -146,6 +147,8 @@ namespace {
         // Get intrinsic matrix TODO: Change to real K
         Eigen::Matrix3d K1 = Eigen::Matrix3d::Identity();
         Eigen::Matrix3d K2 = Eigen::Matrix3d::Identity();
+        K1 << 1520.4, 0, 302.32, 0, 1525.9, 246.87, 0, 0, 1;
+        K2 << 1520.4, 0, 302.32, 0, 1525.9, 246.87, 0, 0, 1;
         // twoview reconstruction for each edge
         std::unique_ptr<GraphStruct> graph;
         graph.reset(new GraphStruct());
