@@ -21,6 +21,10 @@ namespace {
                                           Eigen::Matrix3d K1, Eigen::Matrix3d K2, GraphStruct& graph,
 										  const cv::Mat& img1, const cv::Mat& img2) {
 
+    // 0. initialize
+    graph.K.push_back(K1);
+    graph.K.push_back(K2);
+
     // 1. compute F
     if (!estimateF(feature_struct, frame1, frame2, width, height, img1, img2)) {
       std::cout << "Failed on ransacF" << std::endl;
@@ -28,7 +32,7 @@ namespace {
     }
 
     // 2. compute E
-    E_ = graph.K[frame1].transpose() * F_ * graph.K[frame2];
+    E_ = graph.K[1].transpose() * F_ * graph.K[0];
 
     // 3. Mot from E
     graph.Mot.push_back(RtFromE(graph.K[frame1], graph.K[frame2], feature_struct, frame1, frame2));
@@ -174,17 +178,23 @@ namespace {
     Eigen::Matrix<double, 3, 4, Eigen::ColMajor> Mot;
 
     // 1. Get Motion matrix candidates
-    
     Eigen::JacobiSVD<Eigen::MatrixXd> svd(E_, Eigen::ComputeThinU | Eigen::ComputeThinV);
     Eigen::Matrix3d U = svd.matrixU();
     Eigen::Matrix3d V = svd.matrixV();
+    Eigen::Vector3d s = svd.singularValues();
+    Eigen::Matrix3d S;
+    S << (s(0) + s(1)) / 2, 0, 0, 0, (s(0) + s(1)) / 2, 0, 0, 0, 0;
+    E_ = U * S * V.transpose();
+    Eigen::JacobiSVD<Eigen::MatrixXd> svd2(E_, Eigen::ComputeThinU | Eigen::ComputeThinV);
+    U = svd2.matrixU();
+    V = svd2.matrixV();
     Eigen::Matrix3d W;
     W << 0, -1, 0, 1, 0, 0, 0, 0, 1;
 
     Eigen::Matrix3d R1 = U * W * V.transpose();
     Eigen::Matrix3d R2 = U * W.transpose() * V.transpose();
-    Eigen::MatrixXd t1 = U.col(3);    // TODO: ask god leg if need to be normalized
-    Eigen::MatrixXd t2 = -U.col(3);
+    Eigen::MatrixXd t1 = U.col(2);    // TODO: ask god leg if need to be normalized
+    Eigen::MatrixXd t2 = -U.col(2);
 
     if (R1.determinant() < 0) {
       R1 = -R1;
@@ -192,6 +202,9 @@ namespace {
     if (R2.determinant() < 0) {
       R2 = -R2;
     }
+
+    t1 /= t1.array().abs().maxCoeff();
+    t2 /= t2.array().abs().maxCoeff();
 
     std::vector<Eigen::Matrix<double, 3, 4, Eigen::ColMajor>> mot_candidate(4);
     mot_candidate[0] << R1, t1;
