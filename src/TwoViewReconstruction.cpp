@@ -44,10 +44,18 @@ namespace {
     }
 
     // 5. Save graph
-    for (int i = 0; i < feature_struct.feature_matches[frame1][frame2].size(); ++i) {
+    std::vector<Eigen::Triplet<int>> triplet;
+    int num_matches = feature_struct.feature_matches[frame1][frame2].size();
+    for (int i = 0; i < num_matches; ++i) {
       int frame1_pt_ind = feature_struct.feature_matches[frame1][frame2][i].row();
-      FeaturePoint  = feature_struct.feature_point[frame1][frame1_pt_ind]
+      graph.feature_points.push_back(feature_struct.feature_point[frame1][frame1_pt_ind]);
+      triplet.push_back(Eigen::Triplet<int>(0, i, 2 * i + 1));
+      int frame2_pt_ind = feature_struct.feature_matches[frame1][frame2][i].col();
+      graph.feature_points.push_back(feature_struct.feature_point[frame2][frame2_pt_ind]);
+      triplet.push_back(Eigen::Triplet<int>(1, i, 2 * i + 2));
     }
+    graph.feature_idx.resize(2, num_matches);
+    graph.feature_idx.setFromTriplets(triplet.begin(), triplet.end());
 
     return true;
   }
@@ -110,7 +118,7 @@ namespace {
       }
     }
 
-    std::cout << count << " out of " << mask.rows << " inliers"<< std::endl;
+    std::cout << "RansacF inliers " << count << "/" << mask.rows << std::endl;
 
     if (DEBUG) {
    	  /* draw epolir line */
@@ -228,7 +236,7 @@ namespace {
           count++;
         }
       }
-      // std::cout << "candidate " << i << ": inliers " << count << "/" << Str.cols() << std::endl;
+      std::cout << "candidate " << i << ": inliers " << count << "/" << Str.cols() << std::endl;
       if (count > max_count) {
         max_idx = i;
       }
@@ -250,7 +258,7 @@ namespace {
     cv::eigen2cv(M1, M1_cv);
     cv::eigen2cv(M2, M2_cv);
 
-    // Get 2d point 
+    // Get 2d point
     int matches_len = feature_struct.feature_matches[frame1][frame2].size();
     Str.resize(6, matches_len);
     std::vector<cv::Point2f> pts1_cv(matches_len), pts2_cv(matches_len);
@@ -274,7 +282,7 @@ namespace {
     // Triangulate
     cv::Mat Str_cv;
     cv::triangulatePoints(M1_cv, M2_cv, pts1_cv, pts2_cv, Str_cv);
-    
+
     Eigen::MatrixXd Str_raw;
     cv::cv2eigen(Str_cv, Str_raw);
 

@@ -166,7 +166,7 @@ namespace {
         }
 
         // BundleAdjustment
-
+        // std::cout << graph->feature_idx << std::endl;
         controller->graphs_.push_back(std::move(graph));
     }
 
