@@ -13,7 +13,7 @@
 namespace sparse_batch_sfm {
 
 namespace {
-  bool DEBUG = true;
+  bool DEBUG = false;
 }
 
   bool TwoViewReconstruction::reconstruct(FeatureStruct& feature_struct, int frame1, int frame2,
@@ -222,12 +222,12 @@ namespace {
           count++;
         }
       }
-      std::cout << "candidate " << i << ": inliers " << count << "/" << Str.cols() << std::endl;
+      // std::cout << "candidate " << i << ": inliers " << count << "/" << Str.cols() << std::endl;
       if (count > max_count) {
         max_idx = i;
       }
     }
-    std::cout << "candidate " << max_idx << " selected" << std::endl;
+    // std::cout << "candidate " << max_idx << " selected" << std::endl;
     Mot = mot_candidate[max_idx];
     return Mot;
   }
@@ -269,10 +269,16 @@ namespace {
     cv::Mat Str_cv;
     cv::triangulatePoints(M1_cv, M2_cv, pts1_cv, pts2_cv, Str_cv);
     
-    MatrixXd Str_raw;
+    Eigen::MatrixXd Str_raw;
     cv::cv2eigen(Str_cv, Str_raw);
 
-    std::cout << Str_raw << std::endl;
+    // Normalization
+    Eigen::MatrixXd norm_ = Str_raw.bottomRows(1).replicate(4, 1);
+    Str_raw = Str_raw.array() / norm_.array();
+
+    Str.topRows(3) = Str_raw.topRows(3);
+
+    // std::cout << Str.block(0, 0, 6, 5) << std::endl << std::endl;
     return true;
   }
 
