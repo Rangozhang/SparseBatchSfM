@@ -38,7 +38,7 @@ namespace {
     graph.Mot.push_back(RtFromE(graph.K[0], graph.K[1], feature_struct, frame1, frame2));
 
     // 4. Triangulation
-    if (!triangulate(graph)) {
+    if (!triangulate(graph, feature_struct, frame1, frame2)) {
       std::cout << "Failed on triangulation" << std::endl;
       return false;
     }
@@ -72,7 +72,7 @@ namespace {
     scale.at<double>(2, 2) = 1.0;
 
     cv::Mat mask;
-    cv::Mat f_mat = cv::findFundamentalMat(pts1, pts2, CV_FM_RANSAC, 0.01, 0.99, mask);
+    cv::Mat f_mat = cv::findFundamentalMat(pts1, pts2, CV_FM_RANSAC, 0.0001, 0.99, mask);
     f_mat = scale * f_mat * scale;
 
     cv::cv2eigen(f_mat, F_);
@@ -227,12 +227,16 @@ namespace {
     return Mot;
   }
 
-  bool TwoViewReconstruction::triangulate(GraphStruct& graph) {
+  bool TwoViewReconstruction::triangulate(GraphStruct& graph, const FeatureStruct& feature_struct,
+                                          int frame1, int frame2) {
     // Get projection matrix for img1, img2
-    // Eigen::MatrixXd M1 = graph.K[0] * 
+    Eigen::MatrixXd M1 = graph.K[0] * Eigen::MatrixXd::Identity(3, 4);
+    Eigen::MatrixXd M2 = graph.K[1] * graph.Mot[0];
+
+    // Get 
 
     // Triangulate
-    // cv::triangulatePoints
+    // cv::triangulatePoints()
     return true;
   }
 

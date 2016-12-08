@@ -35,7 +35,7 @@ class TwoViewReconstruction {
   Eigen::Matrix<double, 3, 4, Eigen::ColMajor> RtFromE(const Eigen::Matrix3d& K1, const Eigen::Matrix3d& K2,
                                                        const FeatureStruct& feature_struct,
                                                        int frame1, int frame2);
-  bool triangulate(GraphStruct& graph);
+  bool triangulate(GraphStruct& graph, const FeatureStruct& feature_struct, int frame1, int frame2);
  public:
   bool reconstruct(FeatureStruct& feature_struct, int frame1, int frame2, int img_width, int img_height,
                    Eigen::Matrix3d K1, Eigen::Matrix3d K2, GraphStruct& graph, const cv::Mat& img1, const cv::Mat& img2);

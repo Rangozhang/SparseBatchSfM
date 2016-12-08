@@ -134,7 +134,7 @@ namespace {
     //                                         0,  0, 0, 0, 0, 8, 5, 0;
     // controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 0);
     // std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
-    controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 150);
+    controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 170);
 
     std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
     std::vector<Edge> edges = {};
