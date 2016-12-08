@@ -21,6 +21,10 @@ namespace {
                                           Eigen::Matrix3d K1, Eigen::Matrix3d K2, GraphStruct& graph,
 										  const cv::Mat& img1, const cv::Mat& img2) {
 
+    // 0. initialize
+    graph.K.push_back(K1);
+    graph.K.push_back(K2);
+
     // 1. compute F
     if (!estimateF(feature_struct, frame1, frame2, width, height, img1, img2)) {
       std::cout << "Failed on ransacF" << std::endl;
@@ -28,7 +32,7 @@ namespace {
     }
 
     // 2. compute E
-    E_ = graph.K[frame1].transpose() * F_ * graph.K[frame2];
+    E_ = graph.K[1].transpose() * F_ * graph.K[0];
 
     // 3. Mot from E
     graph.Mot.push_back(RtFromE(graph.K[frame1], graph.K[frame2], feature_struct, frame1, frame2));
@@ -72,6 +76,7 @@ namespace {
     f_mat = scale * f_mat * scale;
 
     cv::cv2eigen(f_mat, F_);
+
 /*
     for (int i = 0; i < feature_struct.feature_matches[frame1][frame2].size(); ++i) {
       cv::Point2f tmp_pt1, tmp_pt2;
@@ -82,8 +87,8 @@ namespace {
       int frame2_pt_ind = feature_struct.feature_matches[frame1][frame2][i].col();
       tmp_pt2.x = feature_struct.feature_point[frame2][frame2_pt_ind].pos(0);
       tmp_pt2.y = feature_struct.feature_point[frame2][frame2_pt_ind].pos(1);
-      std::cout << Eigen::Vector3d(tmp_pt1.x, tmp_pt1.y, 1).transpose() * F_ * Eigen::Vector3d(tmp_pt2.x, tmp_pt2.y, 1) << ' ' << (mask.at<char>(i, 0) == 1) << std::endl;
-    }
+      //std::cout << Eigen::Vector3d(tmp_pt1.x, tmp_pt1.y, 1).transpose() * F_ * Eigen::Vector3d(tmp_pt2.x, tmp_pt2.y, 1) << ' ' << (mask.at<char>(i, 0) == 1) << std::endl;
+   }
 */
 
     int count = 0;
@@ -102,7 +107,14 @@ namespace {
     if (DEBUG) {
    	  /* draw epolir line */
       using namespace cv;
-	  cv::Mat Epilines;
+      // scale back
+      for (int i = 0; i < mask.rows; i++) {
+	    pts1[i].x *= img_width; 
+        pts1[i].y *= img_height; 
+        pts2[i].x *= img_width; 
+        pts2[i].y *= img_height; 
+      }
+      cv::Mat Epilines;
 	  cv::computeCorrespondEpilines(Mat(pts1),1,f_mat,Epilines);
 	  // cout<<"size of Epilines: "<<Epilines.rows<<" | "<<Epilines.cols<<endl;
 	  // cout<<"depth of Epilines: "<<Epilines.depth()<<endl;
@@ -166,17 +178,23 @@ namespace {
     Eigen::Matrix<double, 3, 4, Eigen::ColMajor> Mot;
 
     // 1. Get Motion matrix candidates
-    
     Eigen::JacobiSVD<Eigen::MatrixXd> svd(E_, Eigen::ComputeThinU | Eigen::ComputeThinV);
     Eigen::Matrix3d U = svd.matrixU();
     Eigen::Matrix3d V = svd.matrixV();
+    Eigen::Vector3d s = svd.singularValues();
+    Eigen::Matrix3d S;
+    S << (s(0) + s(1)) / 2, 0, 0, 0, (s(0) + s(1)) / 2, 0, 0, 0, 0;
+    E_ = U * S * V.transpose();
+    Eigen::JacobiSVD<Eigen::MatrixXd> svd2(E_, Eigen::ComputeThinU | Eigen::ComputeThinV);
+    U = svd2.matrixU();
+    V = svd2.matrixV();
     Eigen::Matrix3d W;
     W << 0, -1, 0, 1, 0, 0, 0, 0, 1;
 
     Eigen::Matrix3d R1 = U * W * V.transpose();
     Eigen::Matrix3d R2 = U * W.transpose() * V.transpose();
-    Eigen::MatrixXd t1 = U.col(3);    // TODO: ask god leg if need to be normalized
-    Eigen::MatrixXd t2 = -U.col(3);
+    Eigen::MatrixXd t1 = U.col(2);    // TODO: ask god leg if need to be normalized
+    Eigen::MatrixXd t2 = -U.col(2);
 
     if (R1.determinant() < 0) {
       R1 = -R1;
@@ -184,6 +202,9 @@ namespace {
     if (R2.determinant() < 0) {
       R2 = -R2;
     }
+
+    t1 /= t1.array().abs().maxCoeff();
+    t2 /= t2.array().abs().maxCoeff();
 
     std::vector<Eigen::Matrix<double, 3, 4, Eigen::ColMajor>> mot_candidate(4);
     mot_candidate[0] << R1, t1;
