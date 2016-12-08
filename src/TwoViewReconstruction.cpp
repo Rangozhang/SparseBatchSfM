@@ -73,23 +73,13 @@ namespace {
 
     cv::cv2eigen(f_mat, F_);
 
-    // std::vector<Eigen::Triplet<double>> two_img_match;
-    std::unordered_set<int> kept_fp_ind1, kept_fp_ind2;
-    std::vector<std::vector<FeaturePoint>> new_fp1, new_fp2;
-
     // Get rid of outliers from ransacF
     for (int i = mask.rows-1; i >= 0; --i) {
-      if (mask.at<char>(i, 0) != 0) {
-        
-      } 
-    }
-
-    for (int i = 0; i < feature_struct.feature_point[frame1].size(); ++i) {
-    
-    }
-
-    for (int i = 0; i < feature_struct.feature_point[frame2].size(); ++i) {
-    
+      // if it's outlier
+      if (mask.at<char>(i, 0) == 0) {
+        feature_struct.feature_matches[frame1][frame2].erase(
+                feature_struct.feature_matches[frame1][frame2].begin() + i);
+      }
     }
 
     if (DEBUG) {
