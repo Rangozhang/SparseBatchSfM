@@ -38,10 +38,10 @@ namespace {
     graph.Mot.push_back(RtFromE(graph.K[0], graph.K[1], feature_struct, frame1, frame2));
 
     // 4. Triangulation
-    if (!triangulate(graph, feature_struct, frame1, frame2)) {
-      std::cout << "Failed on triangulation" << std::endl;
-      return false;
-    }
+    // if (!triangulate(graph, feature_struct, frame1, frame2)) {
+    //   std::cout << "Failed on triangulation" << std::endl;
+    //   return false;
+    // }
 
     return true;
   }
@@ -216,16 +216,19 @@ namespace {
     return Mot;
   }
 
-  bool TwoViewReconstruction::triangulate(GraphStruct& graph, const FeatureStruct& feature_struct,
-                                          int frame1, int frame2) {
+  bool TwoViewReconstruction::triangulate(Eigen::Matrix3d K1, Eigen::Matrix3d K2,
+          Eigen::Matrix<double, 3, 4>& Mot, const FeatureStruct& feature_struct,
+          int frame1, int frame2, Eigen::Matrix<double, 6, Eigen::Dynamic> Str) {
     // Get projection matrix for img1, img2
-    Eigen::MatrixXd M1 = graph.K[0] * Eigen::MatrixXd::Identity(3, 4);
-    Eigen::MatrixXd M2 = graph.K[1] * graph.Mot[0];
+    Eigen::MatrixXd M1 = K1 * Eigen::MatrixXd::Identity(3, 4);
+    Eigen::MatrixXd M2 = K2 * Mot;
 
-    // convert to cv::Mat
+    // Convert to cv::Mat
     cv::Mat M1_cv, M2_cv;
     cv::eigen2cv(M1, M1_cv);
     cv::eigen2cv(M2, M2_cv);
+
+    // Get point
 
     // Triangulate
     // cv::triangulatePoints()

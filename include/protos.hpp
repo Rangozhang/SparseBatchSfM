@@ -22,9 +22,9 @@ struct NviewRelationStruct {
 
 struct GraphStruct {
   std::vector<int> frame_idx;
-  std::vector<Eigen::Matrix<double, 3, 3, Eigen::ColMajor>> K;
-  std::vector<Eigen::Matrix<double, 3, 4, Eigen::ColMajor>> Mot;
-  Eigen::Matrix<double, 6, Eigen::Dynamic, Eigen::ColMajor> Str; // x, y, z, r, g, b
+  std::vector<Eigen::Matrix3d> K;
+  std::vector<Eigen::Matrix<double, 3, 4>> Mot;
+  Eigen::Matrix<double, 6, Eigen::Dynamic> Str; // x, y, z, r, g, b
 };
 
 #endif
