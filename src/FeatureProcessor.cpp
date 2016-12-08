@@ -137,7 +137,7 @@ namespace sparse_batch_sfm {
   bool FeatureProcessor::skeletonize(Eigen::Matrix<int, Eigen::Dynamic,
                                      Eigen::Dynamic, Eigen::RowMajor>& skeleton, float min_n_matches=20) {
     int len = skeleton.rows();
-    bool verbose = false;
+    bool verbose = true;
     Eigen::MatrixXi mask(len, len);
     mask.setZero();
     auto bin_mat_ = (skeleton.array() > min_n_matches); // readonly... XD
@@ -152,6 +152,7 @@ namespace sparse_batch_sfm {
                 << bin_mat << std::endl << std::endl;
     }
     std::unordered_set<int> picked;
+    std::unordered_map<int, int> pre_candi;
     std::unordered_set<int> candidate;
 
     int init_ind = -1, pre_ind = -1;
@@ -166,6 +167,7 @@ namespace sparse_batch_sfm {
     pre_ind = init_ind;
     bin_mat.col(pre_ind).setZero();
     int cur_ind = -1;
+    int cur_ind_pre = -1; // cur_ind's pre is not necessary
 
     // CDS
     do {
@@ -186,28 +188,40 @@ namespace sparse_batch_sfm {
           continue;
         }
         candidate.insert(i);
+        pre_candi[i] = pre_ind;
         bin_mat.col(i).setZero();
       }
-      
+
+      if (verbose) {
+        std::cout << "candidate: "; print_unordered_set(candidate);
+      }
+
       // 2. push cur_ind to picked from candidate
       cur_ind = -1;
       double cur_val = 0;
-      for (const int& ele : candidate) {
+      for (const auto& ele : candidate) {
         int n_lin = bin_mat.rowwise().sum()(ele);
         if (cur_val < n_lin) {
           cur_ind = ele;
+          cur_ind_pre = pre_candi[ele];
           cur_val = n_lin;
         }
       }
       if (cur_ind == -1) {
+          std::cout << "No valid neighbors for the previous ind" << std::endl;
           break;
       }
       candidate.erase(cur_ind);
       picked.insert(cur_ind);
+
+      if (verbose) {
+        std::cout << "candidate: "; print_unordered_set(candidate);
+        std::cout << "cur_ind: " << cur_ind << std::endl;
+      }
       
       // 3. store edge in mask
-      mask(pre_ind, cur_ind) = 1;
-      mask(cur_ind, pre_ind) = 1;
+      mask(cur_ind_pre, cur_ind) = 1;
+      mask(cur_ind, cur_ind_pre) = 1;
 
       // 4. set cur_ind to pre_ind
       pre_ind = cur_ind;
@@ -223,6 +237,8 @@ namespace sparse_batch_sfm {
       }
  
     } while (!candidate.empty());
+
+    std::cout << "adding leaves..." << std::endl;
 
     // adding leaves
     for (int i = 0; i < len; ++i) {
