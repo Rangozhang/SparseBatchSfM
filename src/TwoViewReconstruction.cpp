@@ -16,7 +16,7 @@ namespace {
   bool DEBUG = true;
 }
 
-  bool TwoViewReconstruction::reconstruct(const FeatureStruct& feature_struct, int frame1, int frame2,
+  bool TwoViewReconstruction::reconstruct(FeatureStruct& feature_struct, int frame1, int frame2,
                                           int width, int height,
                                           Eigen::Matrix3d K1, Eigen::Matrix3d K2, GraphStruct& graph,
 										  const cv::Mat& img1, const cv::Mat& img2) {
@@ -42,7 +42,7 @@ namespace {
     return true;
   }
 
-  bool TwoViewReconstruction::estimateF(const FeatureStruct& feature_struct,
+  bool TwoViewReconstruction::estimateF(FeatureStruct& feature_struct,
                                         int frame1, int frame2, int img_width, int img_height, const cv::Mat& img1, const cv::Mat& img2) {
     std::vector<cv::Point2f> pts1, pts2;
     for (int i = 0; i < feature_struct.feature_matches[frame1][frame2].size(); ++i) {
@@ -84,7 +84,7 @@ namespace {
       std::cout << Eigen::Vector3d(tmp_pt1.x, tmp_pt1.y, 1).transpose() * f_mat * Eigen::Vector3d(tmp_pt2.x, tmp_pt2.y, 1) << std::endl;
     }*/
 
-
+    int count = 0;
     // Get rid of outliers from ransacF
     for (int i = mask.rows-1; i >= 0; --i) {
       // if it's outlier
@@ -92,7 +92,10 @@ namespace {
         feature_struct.feature_matches[frame1][frame2].erase(
                 feature_struct.feature_matches[frame1][frame2].begin() + i);
       }
+      else
+        count ++;
     }
+    std::cout << mask.size() << ' ' << count << std::endl;
 
     if (DEBUG) {
    	  /* draw epolir line */
