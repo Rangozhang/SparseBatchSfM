@@ -247,15 +247,15 @@ namespace {
     // Get 2d point 
     int matches_len = feature_struct.feature_matches[frame1][frame2].size();
     Str.resize(6, matches_len);
-    vector<cv::Point2f> pts1_cv(matches_len), pts2_cv(matches_len);
+    std::vector<cv::Point2f> pts1_cv(matches_len), pts2_cv(matches_len);
     for (int i = 0; i < matches_len; ++i) {
-      int pt_ind_1 = feature_struct.feature_matches[frame1][frame2].row();
-      FeaturePoint pt1 = feature_struct.feature_point[pt_ind_1];
+      int pt_ind_1 = feature_struct.feature_matches[frame1][frame2][i].row();
+      FeaturePoint pt1 = feature_struct.feature_point[frame1][pt_ind_1];
       pts1_cv[i].x = pt1.pos(0);
       pts1_cv[i].y = pt1.pos(1);
 
-      int pt_ind_2 = feature_struct.feature_matches[frame1][frame2].col();
-      FeaturePoint pt2 = feature_struct.feature_point[pt_ind_2];
+      int pt_ind_2 = feature_struct.feature_matches[frame1][frame2][i].col();
+      FeaturePoint pt2 = feature_struct.feature_point[frame2][pt_ind_2];
       pts2_cv[i].x = pt2.pos(0);
       pts2_cv[i].y = pt2.pos(1);
 
@@ -266,7 +266,13 @@ namespace {
     }
 
     // Triangulate
-    cv::triangulatePoints()
+    cv::Mat Str_cv;
+    cv::triangulatePoints(M1_cv, M2_cv, pts1_cv, pts2_cv, Str_cv);
+    
+    MatrixXd Str_raw;
+    cv::cv2eigen(Str_cv, Str_raw);
+
+    std::cout << Str_raw << std::endl;
     return true;
   }
 
