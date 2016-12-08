@@ -137,7 +137,7 @@ namespace sparse_batch_sfm {
   bool FeatureProcessor::skeletonize(Eigen::Matrix<int, Eigen::Dynamic,
                                      Eigen::Dynamic, Eigen::RowMajor>& skeleton, float min_n_matches=20) {
     int len = skeleton.rows();
-    bool verbose = true;
+    bool verbose = false;
     Eigen::MatrixXi mask(len, len);
     mask.setZero();
     auto bin_mat_ = (skeleton.array() > min_n_matches); // readonly... XD

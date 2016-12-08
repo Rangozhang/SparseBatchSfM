@@ -35,7 +35,7 @@ namespace {
     E_ = graph.K[1].transpose() * F_ * graph.K[0];
 
     // 3. Mot from E
-    graph.Mot.push_back(RtFromE(graph.K[frame1], graph.K[frame2], feature_struct, frame1, frame2));
+    graph.Mot.push_back(RtFromE(graph.K[0], graph.K[1], feature_struct, frame1, frame2));
 
     // 4. Triangulation
     if (!triangulate(graph)) {
@@ -72,12 +72,12 @@ namespace {
     scale.at<double>(2, 2) = 1.0;
 
     cv::Mat mask;
-    cv::Mat f_mat = cv::findFundamentalMat(pts1, pts2, CV_FM_RANSAC, 0.001, 0.99, mask);
+    cv::Mat f_mat = cv::findFundamentalMat(pts1, pts2, CV_FM_RANSAC, 0.01, 0.99, mask);
     f_mat = scale * f_mat * scale;
 
     cv::cv2eigen(f_mat, F_);
 
-/*
+    /*
     for (int i = 0; i < feature_struct.feature_matches[frame1][frame2].size(); ++i) {
       cv::Point2f tmp_pt1, tmp_pt2;
       int frame1_pt_ind = feature_struct.feature_matches[frame1][frame2][i].row();
@@ -89,7 +89,7 @@ namespace {
       tmp_pt2.y = feature_struct.feature_point[frame2][frame2_pt_ind].pos(1);
       //std::cout << Eigen::Vector3d(tmp_pt1.x, tmp_pt1.y, 1).transpose() * F_ * Eigen::Vector3d(tmp_pt2.x, tmp_pt2.y, 1) << ' ' << (mask.at<char>(i, 0) == 1) << std::endl;
    }
-*/
+    */
 
     int count = 0;
     // Get rid of outliers from ransacF
@@ -99,10 +99,12 @@ namespace {
         feature_struct.feature_matches[frame1][frame2].erase(
                 feature_struct.feature_matches[frame1][frame2].begin() + i);
       }
-      else
+      else {
         count ++;
+      }
     }
-    std::cout << mask.size() << ' ' << count << std::endl;
+    
+    std::cout << count << " out of " << mask.rows << " inliers"<< std::endl;
 
     if (DEBUG) {
    	  /* draw epolir line */
@@ -161,8 +163,16 @@ namespace {
 	  }
 	  Mat Epilines_show_pts;
 
+      // std::cout << pts2[1].x << " " << pts2[1].y << std::endl;
+      // std::cout << pts2[3].x << " " << pts2[3].y << std::endl;
+      // std::cout << pts2[5].x << " " << pts2[5].y << std::endl;
 	  std::vector<KeyPoint> pts2_kp;
 	  KeyPoint::convert(pts2, pts2_kp);
+      // std::cout << pts2_kp[1].pt.x << " " << pts2_kp[1].pt.y << std::endl;
+      // std::cout << pts2_kp[3].pt.x << " " << pts2_kp[3].pt.y << std::endl;
+      // std::cout << pts2_kp[5].pt.x << " " << pts2_kp[5].pt.y << std::endl;
+
+      std::cout << "Prepare to show..." << std::endl;
 	  drawKeypoints( Epilines_show, pts2_kp, Epilines_show_pts, Scalar::all(-1), DrawMatchesFlags::DEFAULT );
 	  imshow("Epilines_show",Epilines_show_pts);
 	  waitKey(0);   
@@ -218,6 +228,11 @@ namespace {
   }
 
   bool TwoViewReconstruction::triangulate(GraphStruct& graph) {
+    // Get projection matrix for img1, img2
+    // Eigen::MatrixXd M1 = graph.K[0] * 
+
+    // Triangulate
+    // cv::triangulatePoints
     return true;
   }
 

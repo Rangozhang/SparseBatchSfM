@@ -1,6 +1,10 @@
 #ifndef SPARSEBATCHSFM_CPP_
 #define SPARSEBATCHSFM_CPP_
 
+/* Awesome reference for Eigen
+ * https://eigen.tuxfamily.org/dox/AsciiQuickReference.txt
+ */
+
 #include <fstream>
 #include <unordered_set>
 
@@ -16,6 +20,7 @@ namespace {
   void convertToVectors(const Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>& sk,
                         std::vector<Edge>& edges) {
     int len = sk.rows();
+    // Making sure that j > i
     for (int i = 0; i < len; ++i) {
       for (int j = i+1; j < len; ++j) {
         if (!sk(i, j)) continue;
@@ -129,7 +134,7 @@ namespace {
     //                                         0,  0, 0, 0, 0, 8, 5, 0;
     // controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 0);
     // std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
-    controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 100);
+    controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 150);
 
     std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
     std::vector<Edge> edges = {};
@@ -152,8 +157,9 @@ namespace {
         // twoview reconstruction for each edge
         std::unique_ptr<GraphStruct> graph;
         graph.reset(new GraphStruct());
+        std::cout << "Reconstruct " << edge.idx1 << " " << edge.idx2 << "..." << std::endl;
         if (!controller->twoview_reconstruction_->reconstruct(controller->feature_struct_,
-                                                         0, 1, /*edge.idx1, edge.idx2, */img_width, img_height,
+                                                         edge.idx1, edge.idx2, img_width, img_height,
                                                          K1, K2, *graph.get(), *controller->image_seq_[edge.idx1].get(), *controller->image_seq_[edge.idx2].get())) {
             std::cerr << "Failed to twoview reconstruct" << std::endl;
             return;
