@@ -88,7 +88,7 @@ namespace {
       tmp_pt2.x = feature_struct.feature_point[frame2][frame2_pt_ind].pos(0);
       tmp_pt2.y = feature_struct.feature_point[frame2][frame2_pt_ind].pos(1);
       //std::cout << Eigen::Vector3d(tmp_pt1.x, tmp_pt1.y, 1).transpose() * F_ * Eigen::Vector3d(tmp_pt2.x, tmp_pt2.y, 1) << ' ' << (mask.at<char>(i, 0) == 1) << std::endl;
-   }
+    }
     */
 
     int count = 0;
@@ -136,41 +136,30 @@ namespace {
 	  	Point3f candidate_1 = top_horizontal.cross(Eline);
 	  	Point2f candidate_1_cord = Point2f(candidate_1.x/candidate_1.z, candidate_1.y/candidate_1.z);
 	  	if(candidate_1_cord.x >= 0 && candidate_1_cord.x <= img_width) {
-	  		/* code */
 	  		A = candidate_1_cord;
 	  	}
 	  	Point3f candidate_2 = left_vertical.cross(Eline);
 	  	Point2f candidate_2_cord = Point2f(candidate_2.x/candidate_2.z, candidate_2.y/candidate_2.z);
 	  	if(candidate_2_cord.y >= 0 && candidate_2_cord.y <= img_width) {
-	  		/* code */
 	  		A = candidate_2_cord;
 	  	}
 	  	Point3f candidate_3 = bottom_horizontal.cross(Eline);
 	  	Point2f candidate_3_cord = Point2f(candidate_3.x/candidate_3.z, candidate_3.y/candidate_3.z);
 	  	if(candidate_3_cord.x >= 0 && candidate_3_cord.x <= img_width) {
-	  		/* code */
 	  		B = candidate_3_cord;
 	  	}
 	  	Point3f candidate_4 = right_vertical.cross(Eline);
 	  	Point2f candidate_4_cord = Point2f(candidate_4.x/candidate_4.z, candidate_4.y/candidate_4.z);
 	  	if(candidate_4_cord.y >= 0 && candidate_4_cord.y <= img_width) {
-	  		/* code */
 	  		B = candidate_4_cord;
 	  	}
 
 	  	line(Epilines_show,A,B,Scalar(0,255,0));
-	  	// cout<<"point: "<<x<<"  "<<y<<endl;
 	  }
 	  Mat Epilines_show_pts;
 
-      // std::cout << pts2[1].x << " " << pts2[1].y << std::endl;
-      // std::cout << pts2[3].x << " " << pts2[3].y << std::endl;
-      // std::cout << pts2[5].x << " " << pts2[5].y << std::endl;
 	  std::vector<KeyPoint> pts2_kp;
 	  KeyPoint::convert(pts2, pts2_kp);
-      // std::cout << pts2_kp[1].pt.x << " " << pts2_kp[1].pt.y << std::endl;
-      // std::cout << pts2_kp[3].pt.x << " " << pts2_kp[3].pt.y << std::endl;
-      // std::cout << pts2_kp[5].pt.x << " " << pts2_kp[5].pt.y << std::endl;
 
       std::cout << "Prepare to show..." << std::endl;
 	  drawKeypoints( Epilines_show, pts2_kp, Epilines_show_pts, Scalar::all(-1), DrawMatchesFlags::DEFAULT );
@@ -233,7 +222,10 @@ namespace {
     Eigen::MatrixXd M1 = graph.K[0] * Eigen::MatrixXd::Identity(3, 4);
     Eigen::MatrixXd M2 = graph.K[1] * graph.Mot[0];
 
-    // Get 
+    // convert to cv::Mat
+    cv::Mat M1_cv, M2_cv;
+    cv::eigen2cv(M1, M1_cv);
+    cv::eigen2cv(M2, M2_cv);
 
     // Triangulate
     // cv::triangulatePoints()
