@@ -129,7 +129,7 @@ namespace {
     //                                         0,  0, 0, 0, 0, 8, 5, 0;
     // controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 0);
     // std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
-    controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 20);
+    controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 100);
 
     std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
     std::vector<Edge> edges = {};
@@ -153,7 +153,7 @@ namespace {
         std::unique_ptr<GraphStruct> graph;
         graph.reset(new GraphStruct());
         if (!controller->twoview_reconstruction_->reconstruct(controller->feature_struct_,
-                                                         edge.idx1, edge.idx2, img_width, img_height,
+                                                         0, 1, /*edge.idx1, edge.idx2, */img_width, img_height,
                                                          K1, K2, *graph.get(), *controller->image_seq_[edge.idx1].get(), *controller->image_seq_[edge.idx2].get())) {
             std::cerr << "Failed to twoview reconstruct" << std::endl;
             return;
