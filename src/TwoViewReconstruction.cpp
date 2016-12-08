@@ -72,7 +72,8 @@ namespace {
     f_mat = scale * f_mat * scale;
 
     cv::cv2eigen(f_mat, F_);
-/*    for (int i = 0; i < feature_struct.feature_matches[frame1][frame2].size(); ++i) {
+/*
+    for (int i = 0; i < feature_struct.feature_matches[frame1][frame2].size(); ++i) {
       cv::Point2f tmp_pt1, tmp_pt2;
       int frame1_pt_ind = feature_struct.feature_matches[frame1][frame2][i].row();
       tmp_pt1.x = feature_struct.feature_point[frame1][frame1_pt_ind].pos(0);
@@ -81,8 +82,9 @@ namespace {
       int frame2_pt_ind = feature_struct.feature_matches[frame1][frame2][i].col();
       tmp_pt2.x = feature_struct.feature_point[frame2][frame2_pt_ind].pos(0);
       tmp_pt2.y = feature_struct.feature_point[frame2][frame2_pt_ind].pos(1);
-      std::cout << Eigen::Vector3d(tmp_pt1.x, tmp_pt1.y, 1).transpose() * f_mat * Eigen::Vector3d(tmp_pt2.x, tmp_pt2.y, 1) << std::endl;
-    }*/
+      std::cout << Eigen::Vector3d(tmp_pt1.x, tmp_pt1.y, 1).transpose() * F_ * Eigen::Vector3d(tmp_pt2.x, tmp_pt2.y, 1) << ' ' << (mask.at<char>(i, 0) == 1) << std::endl;
+    }
+*/
 
     int count = 0;
     // Get rid of outliers from ransacF
