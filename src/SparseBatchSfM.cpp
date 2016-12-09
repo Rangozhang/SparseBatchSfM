@@ -149,7 +149,6 @@ namespace {
     /****** Twoview Reconstruction along the skeleton ******/
     std::cout << "Two view Reconstruction" << std::endl;
     for (const auto& edge : edges) {
-        // Get intrinsic matrix TODO: Change to real K
         Eigen::Matrix3d K1 = Eigen::Matrix3d::Identity();
         Eigen::Matrix3d K2 = Eigen::Matrix3d::Identity();
         K1 << 1520.4, 0, 302.32, 0, 1525.9, 246.87, 0, 0, 1;
@@ -179,6 +178,7 @@ namespace {
     }
     while (controller->graphs_.size() > 1) {
       int ind = 1;
+      // The order of the graph array has been sorted according to matches
       for (int i = 1; i < controller->graphs_.size(); ++i) {
         if (hasIdxInHashSet(controller->graphs_[i]->frame_idx, visited_frames)) {
           ind = i;

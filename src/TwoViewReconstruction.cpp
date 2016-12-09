@@ -24,6 +24,8 @@ namespace {
     // 0. initialize
     graph.K.push_back(K1);
     graph.K.push_back(K2);
+    graph.frame_idx.push_back(frame1);
+    graph.frame_idx.push_back(frame2);
 
     // 1. compute F
     if (!estimateF(feature_struct, frame1, frame2, width, height, img1, img2)) {
@@ -206,7 +208,7 @@ namespace {
 
     Eigen::Matrix3d R1 = U * W * V.transpose();
     Eigen::Matrix3d R2 = U * W.transpose() * V.transpose();
-    Eigen::MatrixXd t1 = U.col(2);    // TODO: ask god leg if need to be normalized
+    Eigen::MatrixXd t1 = U.col(2);    // TODO: not sure if this needs to be normalized
     Eigen::MatrixXd t2 = -U.col(2);
 
     if (R1.determinant() < 0) {
