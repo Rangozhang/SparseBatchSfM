@@ -1,13 +1,11 @@
 #include "TwoViewReconstruction.hpp"
 
 #include <unordered_set>
-
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/legacy/legacy.hpp>
-
 #include <Eigen/SVD>
 
 namespace sparse_batch_sfm {
@@ -72,7 +70,9 @@ namespace {
       tmp_pt.y = feature_struct.feature_point[frame1][frame1_pt_ind].pos(1);
       tmp_pt.x /= img_width + 0.0;
       tmp_pt.y /= img_height + 0.0;
+      // std::cout << "1" << std::endl;
       pts1.push_back(tmp_pt);
+      // std::cout << "2" << std::endl;
 
       int frame2_pt_ind = feature_struct.feature_matches[frame1][frame2][i].col();
       tmp_pt.x = feature_struct.feature_point[frame2][frame2_pt_ind].pos(0);

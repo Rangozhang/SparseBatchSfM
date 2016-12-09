@@ -165,6 +165,18 @@ namespace {
         }
 
         // BundleAdjustment
+        std::cout << "BundleAdjustment" <<std::endl;
+        // std::cout << graph->Str(0, 0) << ' ' << graph->Str(1, 0)
+	    //  		 << ' ' << graph->Str(2, 0) << std::endl;
+        // std::cout << graph->Mot[0] << std::endl;
+        BundleAdjustment ba(*graph.get());
+        std::cout << "after running" << std::endl;
+        ba.run(*graph.get());
+
+        // std::cout << graph->Str(0, 0) << ' ' << graph->Str(1, 0)
+	    //  		 << ' ' << graph->Str(2, 0) << std::endl;
+        // std::cout << graph->Mot[0] << std::endl;
+
         // std::cout << graph->feature_idx << std::endl;
         controller->graphs_.push_back(std::move(graph));
     }

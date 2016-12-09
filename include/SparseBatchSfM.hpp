@@ -7,6 +7,7 @@
 #include "ImageCapture.hpp"
 #include "FeatureProcessor.hpp"
 #include "TwoViewReconstruction.hpp"
+#include "BundleAdjustment.hpp"
 #include "utils.hpp"
 
 namespace sparse_batch_sfm {

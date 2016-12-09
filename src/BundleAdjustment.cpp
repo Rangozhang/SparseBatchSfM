@@ -45,12 +45,14 @@ namespace sparse_batch_sfm {
       parameters_[N_PAR_CAM * i + 3] = graph.Mot[i](0, 3);
       parameters_[N_PAR_CAM * i + 4] = graph.Mot[i](1, 3);
       parameters_[N_PAR_CAM * i + 5] = graph.Mot[i](2, 3);
+
+      // std::cout << parameters_[N_PAR_CAM * i + 3] << parameters_[N_PAR_CAM * i + 3] << 
     }
 
     for (int i = 0; i < num_points_; ++i) {
-      parameters_[N_PAR_CAM * num_cameras_ + i * 3]     = graph.Str(i, 0);
-      parameters_[N_PAR_CAM * num_cameras_ + i * 3 + 1] = graph.Str(i, 1);
-      parameters_[N_PAR_CAM * num_cameras_ + i * 3 + 2] = graph.Str(i, 2);
+      parameters_[N_PAR_CAM * num_cameras_ + i * 3]     = graph.Str(0, i);
+      parameters_[N_PAR_CAM * num_cameras_ + i * 3 + 1] = graph.Str(1, i);
+      parameters_[N_PAR_CAM * num_cameras_ + i * 3 + 2] = graph.Str(2, i);
     }
 
     return;
@@ -59,10 +61,20 @@ namespace sparse_batch_sfm {
   bool BundleAdjustment::run(GraphStruct& graph) {
     // Optimize motion and structure
     ceres::Problem problem;
-    // const double* observations = this->observations();
+    const double* observations = this->observations();
+    std::cout << "here1" << std::endl;
     for (int i = 0; i < num_observations_; ++i) {
       double K_arr[9];
-      Eigen::Map<Eigen::Matrix3d>(K_arr, 3, 3) = graph.K[camera_index_[i]].transpose(); // row major
+      K_arr[0] = graph.K[camera_index_[i]](0, 0);
+      K_arr[0] = graph.K[camera_index_[i]](0, 1);
+      K_arr[0] = graph.K[camera_index_[i]](0, 2);
+      K_arr[0] = graph.K[camera_index_[i]](1, 0);
+      K_arr[0] = graph.K[camera_index_[i]](1, 1);
+      K_arr[0] = graph.K[camera_index_[i]](1, 2);
+      K_arr[0] = graph.K[camera_index_[i]](2, 0);
+      K_arr[0] = graph.K[camera_index_[i]](2, 1);
+      K_arr[0] = graph.K[camera_index_[i]](2, 2);
+      // Eigen::Map<Eigen::Matrix3d>(K_arr, 3, 3) = graph.K[camera_index_[i]].transpose(); // row major
       ceres::CostFunction* cost_function =
                 SnavelyReprojectionError::Create(observations_[2*i],
                                            observations_[2*i+1],
@@ -73,6 +85,7 @@ namespace sparse_batch_sfm {
                                mutable_point_for_observation(i));
     }
 
+    std::cout << "here1" << std::endl;
     ceres::Solver::Options options;
     options.linear_solver_type = ceres::DENSE_SCHUR;
     options.minimizer_progress_to_stdout = true;
@@ -83,18 +96,31 @@ namespace sparse_batch_sfm {
     // Push back to graph
     for (int i = 0; i < num_cameras_; ++i) {
       // Convert from rotation matrix to Angle-Axis representation
-      double rotation[9];
-      ceres::AngleAxisToRotationMatrix(parameters_ + N_PAR_CAM * i, rotation);
-      graph.Mot[i].leftCols(3) = Eigen::Map<Eigen::MatrixXd>(rotation, 3, 3);
+      double* rotation = new double[9];
+      ceres::AngleAxisToRotationMatrix<double>(parameters_ + N_PAR_CAM * i, rotation);
+      // graph.Mot[i].block(0, 0, 3, 3) = Eigen::Map<Eigen::MatrixXd>(rotation, 3, 3);
+      // Eigen::MatrixXd tmp_matrix  = Eigen::Map<Eigen::MatrixXd>(rotation, 3, 3);
+      // std::cout << tmp_matrix << std::endl;
+      // graph.Mot[i].block(0, 0, 3, 3) = tmp_matrix;
+      graph.Mot[i](0, 0) = rotation[0];  
+      graph.Mot[i](1, 0) = rotation[1]; 
+      graph.Mot[i](2, 0) = rotation[2]; 
+      graph.Mot[i](0, 1) = rotation[3]; 
+      graph.Mot[i](1, 1) = rotation[4]; 
+      graph.Mot[i](2, 1) = rotation[5]; 
+      graph.Mot[i](0, 2) = rotation[6]; 
+      graph.Mot[i](1, 2) = rotation[7]; 
+      graph.Mot[i](2, 2) = rotation[8]; 
       graph.Mot[i](0, 3) = parameters_[N_PAR_CAM * i + 3];
       graph.Mot[i](1, 3) = parameters_[N_PAR_CAM * i + 4];
       graph.Mot[i](2, 3) = parameters_[N_PAR_CAM * i + 5];
+      delete[] rotation;
     }
 
     for (int i = 0; i < num_points_; ++i) {
-      graph.Str(i, 0) = parameters_[N_PAR_CAM * num_cameras_ + i * 3];
-      graph.Str(i, 1) = parameters_[N_PAR_CAM * num_cameras_ + i * 3 + 1];
-      graph.Str(i, 2) = parameters_[N_PAR_CAM * num_cameras_ + i * 3 + 2];
+      graph.Str(0, i) = parameters_[N_PAR_CAM * num_cameras_ + i * 3];
+      graph.Str(1, i) = parameters_[N_PAR_CAM * num_cameras_ + i * 3 + 1];
+      graph.Str(2, i) = parameters_[N_PAR_CAM * num_cameras_ + i * 3 + 2];
     } 
     return true;
   }
