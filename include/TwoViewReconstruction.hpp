@@ -38,7 +38,7 @@ class TwoViewReconstruction {
                                                        int frame1, int frame2);
 
   bool triangulate(const Eigen::Matrix3d& K1, const Eigen::Matrix3d& K2,
-                   const Eigen::Matrix<double, 3, 4>& Mot, const FeatureStruct& feature_struct,
+                   const Eigen::Matrix<double, 3, 4>& Mot1, const Eigen::Matrix<double, 3, 4>& Mot2, const FeatureStruct& feature_struct,
                    int frame1, int frame2, Eigen::Matrix<double, 6, Eigen::Dynamic>& Str);
 
  public:

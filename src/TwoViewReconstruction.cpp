@@ -26,24 +26,30 @@ namespace {
     graph.frame_idx.push_back(frame2);
 
     // 1. compute F
+    std::cout << "compute F" << std::endl;
     if (!estimateF(feature_struct, frame1, frame2, width, height, img1, img2)) {
       std::cout << "Failed on ransacF" << std::endl;
       return false;
     }
 
     // 2. compute E
+    std::cout << "compute E" << std::endl;
     E_ = graph.K[1].transpose() * F_ * graph.K[0];
 
     // 3. Mot from E
+    std::cout << "Mot From E" << std::endl;
+    graph.Mot.push_back(Eigen::Matrix<double, 3, 4>::Identity());
     graph.Mot.push_back(RtFromE(graph.K[0], graph.K[1], feature_struct, frame1, frame2));
 
     // 4. Triangulation
-    if (!triangulate(graph.K[0], graph.K[1], graph.Mot[0], feature_struct, frame1, frame2, graph.Str)) {
+    std::cout << "Triangulation" << std::endl;
+    if (!triangulate(graph.K[0], graph.K[1], graph.Mot[0], graph.Mot[1], feature_struct, frame1, frame2, graph.Str)) {
       std::cout << "Failed on triangulation" << std::endl;
       return false;
     }
 
     // 5. Save graph
+    std::cout << "Save graph" << std::endl;
     std::vector<Eigen::Triplet<int>> triplet;
     int num_matches = feature_struct.feature_matches[frame1][frame2].size();
     for (int i = 0; i < num_matches; ++i) {
@@ -70,9 +76,7 @@ namespace {
       tmp_pt.y = feature_struct.feature_point[frame1][frame1_pt_ind].pos(1);
       tmp_pt.x /= img_width + 0.0;
       tmp_pt.y /= img_height + 0.0;
-      // std::cout << "1" << std::endl;
       pts1.push_back(tmp_pt);
-      // std::cout << "2" << std::endl;
 
       int frame2_pt_ind = feature_struct.feature_matches[frame1][frame2][i].col();
       tmp_pt.x = feature_struct.feature_point[frame2][frame2_pt_ind].pos(0);
@@ -231,7 +235,7 @@ namespace {
     int count, max_count = 0, max_idx = -1;
     for (int i = 0; i < 4; i++) {
       Eigen::Matrix<double, 6, Eigen::Dynamic> Str;
-      triangulate(K1, K2, mot_candidate[i], feature_struct, frame1, frame2, Str);
+      triangulate(K1, K2, Eigen::MatrixXd::Identity(3, 4), mot_candidate[i], feature_struct, frame1, frame2, Str);
       int count = 0;
       for (int n = 0; n < Str.cols(); n++) {
         if ((mot_candidate[i].block(2,0,1,3) * (Str.block(0,n,3,1) - mot_candidate[i].block(0,3,3,1)))(0,0) > 0 && Str(2,n) > 0) {
@@ -249,11 +253,11 @@ namespace {
   }
 
   bool TwoViewReconstruction::triangulate(const Eigen::Matrix3d& K1, const Eigen::Matrix3d& K2,
-          const Eigen::Matrix<double, 3, 4>& Mot, const FeatureStruct& feature_struct,
+          const Eigen::Matrix<double, 3, 4>& Mot1, const Eigen::Matrix<double, 3, 4>& Mot2, const FeatureStruct& feature_struct,
           int frame1, int frame2, Eigen::Matrix<double, 6, Eigen::Dynamic>& Str) {
     // Get projection matrix for img1, img2
-    Eigen::MatrixXd M1 = K1 * Eigen::MatrixXd::Identity(3, 4);
-    Eigen::MatrixXd M2 = K2 * Mot;
+    Eigen::MatrixXd M1 = K1 * Mot1;
+    Eigen::MatrixXd M2 = K2 * Mot2;
 
     // Convert to cv::Mat
     cv::Mat M1_cv, M2_cv;

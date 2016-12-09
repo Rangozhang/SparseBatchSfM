@@ -68,7 +68,7 @@ struct SnavelyReprojectionError {
 class BundleAdjustment {
  public:
 
-  BundleAdjustment(const GraphStruct& graph);
+  // BundleAdjustment();
   ~BundleAdjustment() {
     delete[] point_index_;
     delete[] camera_index_;

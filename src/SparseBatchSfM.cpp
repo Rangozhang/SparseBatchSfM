@@ -148,7 +148,9 @@ namespace {
 
     /****** Twoview Reconstruction along the skeleton ******/
     std::cout << "Two view Reconstruction" << std::endl;
-    for (const auto& edge : edges) {
+    std::vector<Edge> tmp_edges = {};
+    tmp_edges.push_back(edges[0]);
+    for (const auto& edge : tmp_edges) {
         Eigen::Matrix3d K1 = Eigen::Matrix3d::Identity();
         Eigen::Matrix3d K2 = Eigen::Matrix3d::Identity();
         K1 << 1520.4, 0, 302.32, 0, 1525.9, 246.87, 0, 0, 1;
@@ -169,9 +171,11 @@ namespace {
         // std::cout << graph->Str(0, 0) << ' ' << graph->Str(1, 0)
 	    //  		 << ' ' << graph->Str(2, 0) << std::endl;
         // std::cout << graph->Mot[0] << std::endl;
-        BundleAdjustment ba(*graph.get());
-        std::cout << "after running" << std::endl;
-        ba.run(*graph.get());
+        std::unique_ptr<BundleAdjustment> ba;
+        ba.reset(new BundleAdjustment());
+        // std::cout << "after running" << std::endl;
+        ba->run(*graph.get());
+        ba.reset();
 
         // std::cout << graph->Str(0, 0) << ' ' << graph->Str(1, 0)
 	    //  		 << ' ' << graph->Str(2, 0) << std::endl;
@@ -181,39 +185,40 @@ namespace {
         controller->graphs_.push_back(std::move(graph));
     }
 
+    std::cout << "Two view Reconstruction ends" << std::endl;
 
     /****** Merge graphs ******/
-    std::cout << "Merge Graphs" << std::endl;
-    std::unordered_set<int> visited_frames;
-    for (const auto& idx : controller->graphs_[0]->frame_idx) {
-      visited_frames.insert(idx);
-    }
-    while (controller->graphs_.size() > 1) {
-      int ind = 1;
-      // The order of the graph array has been sorted according to matches
-      for (int i = 1; i < controller->graphs_.size(); ++i) {
-        if (hasIdxInHashSet(controller->graphs_[i]->frame_idx, visited_frames)) {
-          ind = i;
-          break;
-        }
-      }
+    // std::cout << "Merge Graphs" << std::endl;
+    // std::unordered_set<int> visited_frames;
+    // for (const auto& idx : controller->graphs_[0]->frame_idx) {
+    //   visited_frames.insert(idx);
+    // }
+    // while (controller->graphs_.size() > 1) {
+    //   int ind = 1;
+    //   // The order of the graph array has been sorted according to matches
+    //   for (int i = 1; i < controller->graphs_.size(); ++i) {
+    //     if (hasIdxInHashSet(controller->graphs_[i]->frame_idx, visited_frames)) {
+    //       ind = i;
+    //       break;
+    //     }
+    //   }
 
-      // merge the second one to the first one
-      // merge(graphs_[0], graphs_[ind]);
+    //   // merge the second one to the first one
+    //   // merge(graphs_[0], graphs_[ind]);
 
-      // bundleadjustment(graphs_[0]);
+    //   // bundleadjustment(graphs_[0]);
 
-      // put the new vertex in to hash set
-      for (const auto& frame_idx : controller->graphs_[ind]->frame_idx) {
-        visited_frames.insert(frame_idx);
-      }
+    //   // put the new vertex in to hash set
+    //   for (const auto& frame_idx : controller->graphs_[ind]->frame_idx) {
+    //     visited_frames.insert(frame_idx);
+    //   }
 
-      controller->graphs_.erase(controller->graphs_.begin() + ind);
-    }
+    //   controller->graphs_.erase(controller->graphs_.begin() + ind);
+    // }
 
-    if (!controller->writeGraphToPLYFile(controller->graphs_, "./result.ply")) {
-      std::cerr << "Can not write the structure to .ply file.";
-    }
+    // if (!controller->writeGraphToPLYFile(controller->graphs_, "./result.ply")) {
+    //   std::cerr << "Can not write the structure to .ply file.";
+    // }
 
     return;
   }
