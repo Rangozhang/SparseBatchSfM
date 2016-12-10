@@ -93,7 +93,7 @@ namespace {
 
     cv::Mat mask;
     // 0.001 for visulation
-    cv::Mat f_mat = cv::findFundamentalMat(pts1, pts2, CV_FM_RANSAC, 0.001, 0.99, mask);
+    cv::Mat f_mat = cv::findFundamentalMat(pts1, pts2, CV_FM_RANSAC, 0.0001, 0.99, mask);
     f_mat = scale * f_mat * scale;
 
     cv::cv2eigen(f_mat, F_);
