@@ -92,7 +92,8 @@ namespace {
     scale.at<double>(2, 2) = 1.0;
 
     cv::Mat mask;
-    cv::Mat f_mat = cv::findFundamentalMat(pts1, pts2, CV_FM_RANSAC, 0.0001, 0.99, mask);
+    // 0.001 for visulation
+    cv::Mat f_mat = cv::findFundamentalMat(pts1, pts2, CV_FM_RANSAC, 0.001, 0.99, mask);
     f_mat = scale * f_mat * scale;
 
     cv::cv2eigen(f_mat, F_);
@@ -292,9 +293,13 @@ namespace {
     Eigen::MatrixXd Str_raw;
     cv::cv2eigen(Str_cv, Str_raw);
 
+    // std::cout << "Raw Structure: " << std::endl << Str_raw.col(1) << std::endl << std::endl;
+
     // Normalization
     Eigen::MatrixXd norm_ = Str_raw.bottomRows(1).replicate(4, 1);
     Str_raw = Str_raw.array() / norm_.array();
+
+    // std::cout << "Normed Structure: " << std::endl << Str_raw.col(1) << std::endl << std::endl;
 
     Str.topRows(3) = Str_raw.topRows(3);
 

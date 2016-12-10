@@ -6,6 +6,7 @@
  */
 
 #include <fstream>
+#include <string>
 #include <unordered_set>
 
 #include "SparseBatchSfM.hpp"
@@ -64,15 +65,11 @@ namespace {
     return instance_;
   }
 
-  bool SparseBatchSfM::writeGraphToPLYFile(const std::vector<std::unique_ptr<GraphStruct>>& graphs,
+  bool SparseBatchSfM::writeGraphToPLYFile(const GraphStruct& graph,
                                            const char* filename) {
-    // only write down the first graph in graphs
-    if (!graphs.size()) return false;
-    const std::unique_ptr<GraphStruct>& graph = graphs[0];
-
     std::ofstream of(filename);
 
-    int n_points = graph->Str.cols();
+    int n_points = graph.Str.cols();
 
     of << "ply"
        << '\n' << "format ascii 1.0"
@@ -86,8 +83,8 @@ namespace {
        << '\n' << "end_header" << std::endl;
 
     for (int i = 0; i < n_points; ++i) {
-      of << graph->Str(0, i) << ' ' << graph->Str(1, i) << ' ' << graph->Str(2, i)
-         << graph->Str(3, i) << ' ' << graph->Str(4, i) << ' ' << graph->Str(5, i) << '\n';
+      of << graph.Str(0, i) << ' ' << graph.Str(1, i) << ' ' << graph.Str(2, i) << ' '
+         << graph.Str(3, i) << ' ' << graph.Str(4, i) << ' ' << graph.Str(5, i) << '\n';
     }
 
     of.close();
@@ -148,9 +145,8 @@ namespace {
 
     /****** Twoview Reconstruction along the skeleton ******/
     std::cout << "Two view Reconstruction" << std::endl;
-    std::vector<Edge> tmp_edges = {};
-    tmp_edges.push_back(edges[0]);
-    for (const auto& edge : tmp_edges) {
+    // std::vector<Edge> tmp_edges = {edges[0]};
+    for (const auto& edge : edges) {
         Eigen::Matrix3d K1 = Eigen::Matrix3d::Identity();
         Eigen::Matrix3d K2 = Eigen::Matrix3d::Identity();
         K1 << 1520.4, 0, 302.32, 0, 1525.9, 246.87, 0, 0, 1;
@@ -166,14 +162,22 @@ namespace {
             return;
         }
 
+        // std::cout << "Structure: " << std::endl;
+        // for (int i = 0; i < graph->Str.cols(); ++i) {
+        //   std::cout << graph->Str(0, i) << ' ' << graph->Str(1, i) << ' ' << graph->Str(2, i) << std::endl;
+        // }
+
+        std::string two_view_file = "output/TwoView_" + std::to_string(edge.idx1) + "_" + std::to_string(edge.idx2) + ".ply";
+        controller->writeGraphToPLYFile(*graph.get(), two_view_file.c_str());
+
         // BundleAdjustment
         std::cout << "BundleAdjustment" <<std::endl;
         // std::cout << graph->Str(0, 0) << ' ' << graph->Str(1, 0)
 	    //  		 << ' ' << graph->Str(2, 0) << std::endl;
         // std::cout << graph->Mot[0] << std::endl;
+        
         std::unique_ptr<BundleAdjustment> ba;
         ba.reset(new BundleAdjustment());
-        // std::cout << "after running" << std::endl;
         ba->run(*graph.get());
         ba.reset();
 
@@ -185,10 +189,8 @@ namespace {
         controller->graphs_.push_back(std::move(graph));
     }
 
-    std::cout << "Two view Reconstruction ends" << std::endl;
-
     /****** Merge graphs ******/
-    // std::cout << "Merge Graphs" << std::endl;
+    std::cout << "Merge Graphs" << std::endl;
     // std::unordered_set<int> visited_frames;
     // for (const auto& idx : controller->graphs_[0]->frame_idx) {
     //   visited_frames.insert(idx);

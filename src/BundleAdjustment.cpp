@@ -33,7 +33,7 @@ namespace sparse_batch_sfm {
         int fvec_ind = it.value()-1;  // all + 1 in sparse matrix
         point_index_[obs_ind] = it.col();
         camera_index_[obs_ind] = it.row();
-        // std::cout << "Checking:" << std::endl;
+        // std::cout << "Sparse Matrix:" << std::endl;
         // std::cout << it.col() << ' ' << it.row() << std::endl; 
         // std::cout << fvec_ind << std::endl; 
 
@@ -94,21 +94,26 @@ namespace sparse_batch_sfm {
     ceres::Problem problem;
     const double* observations = this->observations();
     for (int i = 0; i < num_observations_; ++i) {
-      double K_arr[9];
-      K_arr[0] = graph.K[camera_index_[i]](0, 0);
-      K_arr[1] = graph.K[camera_index_[i]](0, 1);
-      K_arr[2] = graph.K[camera_index_[i]](0, 2);
-      K_arr[3] = graph.K[camera_index_[i]](1, 0);
-      K_arr[4] = graph.K[camera_index_[i]](1, 1);
-      K_arr[5] = graph.K[camera_index_[i]](1, 2);
-      K_arr[6] = graph.K[camera_index_[i]](2, 0);
-      K_arr[7] = graph.K[camera_index_[i]](2, 1);
-      K_arr[8] = graph.K[camera_index_[i]](2, 2);
-      Eigen::Map<Eigen::Matrix3d>(K_arr, 3, 3) = graph.K[camera_index_[i]].transpose(); // row major
+      // double K_arr[9];
+      // Eigen::Map<Eigen::Matrix3d>(K_arr, 3, 3) = graph.K[camera_index_[i]].transpose(); // K_arr needs to be row major
+      // K_arr[0] = graph.K[camera_index_[i]](0, 0);
+      // K_arr[1] = graph.K[camera_index_[i]](0, 1);
+      // K_arr[2] = graph.K[camera_index_[i]](0, 2);
+      // K_arr[3] = graph.K[camera_index_[i]](1, 0);
+      // K_arr[4] = graph.K[camera_index_[i]](1, 1);
+      // K_arr[5] = graph.K[camera_index_[i]](1, 2);
+      // K_arr[6] = graph.K[camera_index_[i]](2, 0);
+      // K_arr[7] = graph.K[camera_index_[i]](2, 1);
+      // K_arr[8] = graph.K[camera_index_[i]](2, 2);
+      // std::cout << "K: ";
+      // for (int i = 0; i < 9; ++i) {
+      //   std::cout << K_arr[i] << ' ';
+      // }
+      // std::cout << std::endl;
       ceres::CostFunction* cost_function =
                 SnavelyReprojectionError::Create(observations_[2*i],
-                                           observations_[2*i+1],
-                                           K_arr);
+                                                 observations_[2*i+1],
+                                                 graph.K[camera_index_[i]]);
       problem.AddResidualBlock(cost_function,
                                NULL,
                                mutable_camera_for_observation(i),
@@ -120,7 +125,7 @@ namespace sparse_batch_sfm {
     options.minimizer_progress_to_stdout = true;
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem, &summary);
-    std::cout << summary.FullReport() << "\n";
+    std::cout << summary.BriefReport() << "\n";
 
     // Push back to graph
     for (int i = 0; i < num_cameras_; ++i) {
@@ -155,7 +160,7 @@ namespace sparse_batch_sfm {
       graph.Mot[i](0, 3) = parameters_[6 * i + 3];
       graph.Mot[i](1, 3) = parameters_[6 * i + 4];
       graph.Mot[i](2, 3) = parameters_[6 * i + 5];
-      // delete[] rotation;
+      delete[] rotation;
     }
 
     for (int i = 0; i < num_points_; ++i) {

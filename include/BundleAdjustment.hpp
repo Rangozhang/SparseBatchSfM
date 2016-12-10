@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <memory>
+#include <Eigen/Dense>
 
 #include "protos.hpp"
 #include "ceres/ceres.h"
@@ -15,39 +16,49 @@
 
 namespace sparse_batch_sfm {
 
-namespace {
-
-constexpr int N_PAR_CAM = 6;
-
-}
-
 // Templated pinhole camera model for used with Ceres.  The camera is
 // parameterized using 6 parameters: 3 for rotation, 3 for translation
 struct SnavelyReprojectionError {
   // The parameter intrinsic is a 9-by-1 vector for K (Row Majored)
-  SnavelyReprojectionError(double observed_x, double observed_y, double* K)
+  SnavelyReprojectionError(double observed_x, double observed_y, Eigen::Matrix3d& K)
       : observed_x(observed_x), observed_y(observed_y), K(K) {}
   template <typename T>
   bool operator()(const T* const camera,
                   const T* const point,
                   T* residuals) const {
+    // std::cout << "K: " << K << std::endl;
+
     // camera[0,1,2] are the angle-axis rotation.
+    // std::cout << "Input 3D point: ";
+    // std::cout << point[0] << ' ' << point[1] << ' ' << point[2] << std::endl;
     T p[3];
     ceres::AngleAxisRotatePoint(camera, point, p);
+
+    // std::cout << "Rotated 3D point: ";
+    // std::cout << p[0] << ' ' << p[1] << ' ' << p[2] << std::endl;
+
     // camera[3,4,5] are the translation.
     p[0] += camera[3];
     p[1] += camera[4];
     p[2] += camera[5];
 
-    T predicted_x = T(K[0]) * p[0] + T(K[1]) * p[1] + T(K[2]) * p[2];
-    T predicted_y = T(K[3]) * p[0] + T(K[4]) * p[1] + T(K[5]) * p[2];
-    T predicted_z = T(K[6]) * p[0] + T(K[7]) * p[1] + T(K[8]) * p[2];
+    // std::cout << "Translated 3D point: ";
+    // std::cout << p[0] << ' ' << p[1] << ' ' << p[2] << std::endl;
+
+    T predicted_x = T(K(0, 0)) * p[0] + T(K(0, 1)) * p[1] + T(K(0, 2)) * p[2];
+    T predicted_y = T(K(1, 0)) * p[0] + T(K(1, 1)) * p[1] + T(K(1, 2)) * p[2];
+    T predicted_z = T(K(2, 0)) * p[0] + T(K(2, 1)) * p[1] + T(K(2, 2)) * p[2];
+
+    // std::cout << "Ked 3D point: ";
+    // std::cout << predicted_x << ' ' << predicted_y << ' ' << predicted_z << std::endl;
 
     // Normalization
     predicted_x /= predicted_z;
     predicted_y /= predicted_z;
 
     // The error is the difference between the predicted and observed position.
+    // std::cout << "predicted vs . observed: ";
+    // std::cout << predicted_x << ' ' << predicted_y << " : " << observed_x << ' ' << observed_y << std::endl;
     residuals[0] = predicted_x - observed_x;
     residuals[1] = predicted_y - observed_y;
     return true;
@@ -56,13 +67,14 @@ struct SnavelyReprojectionError {
   // the client code.
   static ceres::CostFunction* Create(const double observed_x,
                                      const double observed_y,
-									 double* K) {
-    return (new ceres::AutoDiffCostFunction<SnavelyReprojectionError, 2, N_PAR_CAM, 3>(
+									 Eigen::Matrix3d& K) {
+
+    return (new ceres::AutoDiffCostFunction<SnavelyReprojectionError, 2, 6, 3>(
                 new SnavelyReprojectionError(observed_x, observed_y, K)));
   }
   double observed_x;
   double observed_y;
-  double* K;
+  Eigen::Matrix3d K;
 };
 
 class BundleAdjustment {
@@ -80,9 +92,9 @@ class BundleAdjustment {
   int num_observations()       const { return num_observations_;               }
   const double* observations() const { return observations_;                   }
   double* mutable_cameras()          { return parameters_;                     }
-  double* mutable_points()           { return parameters_  + N_PAR_CAM * num_cameras_; }
+  double* mutable_points()           { return parameters_  + 6 * num_cameras_; }
   double* mutable_camera_for_observation(int i) {
-    return mutable_cameras() + camera_index_[i] * N_PAR_CAM;
+    return mutable_cameras() + camera_index_[i] * 6;
   }
   double* mutable_point_for_observation(int i) {
     return mutable_points() + point_index_[i] * 3;
@@ -98,7 +110,7 @@ class BundleAdjustment {
   int* point_index_;
   int* camera_index_;
   double* observations_;
-  double* parameters_;   // N_PAR_CAM * camera + points
+  double* parameters_;   // 6 * camera + points
 };
 
 } // namespace sparse_batch_sfm
