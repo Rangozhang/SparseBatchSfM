@@ -8,10 +8,6 @@
 
 #include "protos.hpp"
 
-/*
- K
-*/
-
 namespace sparse_batch_sfm {
 
 class TwoViewReconstruction {
