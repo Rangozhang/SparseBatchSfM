@@ -9,6 +9,10 @@
 #include "opencv2/nonfree/features2d.hpp"
 
 namespace sparse_batch_sfm {
+  struct point_pair {
+    double x1, y1, x2, y2;
+  }
+
   bool FeatureProcessor::feature_match(const std::vector<std::unique_ptr<cv::Mat>>& image_seq,
                                        FeatureStruct& feature_struct,
                                        int minHessian = 400, float match_thres = 200, bool visualize = false) {
@@ -47,7 +51,7 @@ namespace sparse_batch_sfm {
   }
 
   // match features between each pair of images
-  std::vector<std::unordered_map<int, int>> hash(seq_len);
+  //std::vector<std::unordered_map<int, int>> hash(seq_len);
   std::vector<Eigen::Triplet<int>> triplet;
   cv::FlannBasedMatcher matcher;
   std::vector<cv::DMatch> matches;
@@ -61,6 +65,7 @@ namespace sparse_batch_sfm {
         // count the number of good matches
         std::vector<cv::DMatch> good_matches;
         int count = 0;
+        std::unordered_set<Eigen::Triplet> hash;
         for(int n = 1; n < matches.size(); n++) {
           if(matches[n].distance < match_thres) {
             this_this_match.push_back(Eigen::Triplet<double>(matches[n].queryIdx, matches[n].trainIdx));
@@ -122,7 +127,7 @@ namespace sparse_batch_sfm {
 
 //  for(int n = 0; n < triplet.size(); n++)
 //    std::cout << triplet[n].row() << ' ' << triplet[n].col() << ' ' << triplet[n].value() << std::endl;
- 
+
   return true;
   }
 
@@ -218,7 +223,7 @@ namespace sparse_batch_sfm {
         std::cout << "candidate: "; print_unordered_set(candidate);
         std::cout << "cur_ind: " << cur_ind << std::endl;
       }
-      
+
       // 3. store edge in mask
       mask(cur_ind_pre, cur_ind) = 1;
       mask(cur_ind, cur_ind_pre) = 1;
@@ -235,7 +240,7 @@ namespace sparse_batch_sfm {
         std::cout << "mask: " << std::endl << mask << std::endl;
         std::cout << std::endl;
       }
- 
+
     } while (!candidate.empty());
 
     std::cout << "adding leaves..." << std::endl;
@@ -269,8 +274,8 @@ namespace sparse_batch_sfm {
       std::cout << "mask: " << std::endl << mask << std::endl;
       std::cout << std::endl;
     }
- 
+
     return true;
   }
-  
+
 }
