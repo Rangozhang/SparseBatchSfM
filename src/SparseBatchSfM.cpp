@@ -176,16 +176,15 @@ namespace {
 	    //  		 << ' ' << graph->Str(2, 0) << std::endl;
         // std::cout << graph->Mot[0] << std::endl;
         
-        std::unique_ptr<BundleAdjustment> ba;
-        ba.reset(new BundleAdjustment());
-        ba->run(*graph.get());
-        ba.reset();
+        BundleAdjustment ba;
+        ba.run(*graph.get());
 
         // std::cout << graph->Str(0, 0) << ' ' << graph->Str(1, 0)
 	    //  		 << ' ' << graph->Str(2, 0) << std::endl;
         // std::cout << graph->Mot[0] << std::endl;
 
         // std::cout << graph->feature_idx << std::endl;
+
         controller->graphs_.push_back(std::move(graph));
     }
 
