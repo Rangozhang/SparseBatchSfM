@@ -265,7 +265,7 @@ namespace {
       if (i == 0 || i == 1) {
         tmp_graph.Str.block(3, i, 3, 1) << 255, 0, 0;
       } else {
-        tmp_graph.Str.block(3, i, 3, 1) << 0, 255 - 15*(i-2), 0;
+        tmp_graph.Str.block(3, i, 3, 1) << 0, 255 - 10*(i-2), 0;
       }
     }
     std::cout << std::endl;
