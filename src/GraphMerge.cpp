@@ -163,18 +163,17 @@ namespace sparse_batch_sfm {
       int count = 0;
       for (int i = 0; i < num_point2; i++) {
         int point_ind2 = graphB.feature_idx.coeff(commonFrameIdx2_, i);
-        //std::cout << point_ind2 << std::endl;
         if (point_ind2 > 0) {
           point_2d this_point;
           this_point.x = graphB.feature_points[point_ind2 - 1].pos(0);
           this_point.y = graphB.feature_points[point_ind2 - 1].pos(1);
+          int point_ind1 = graphB.feature_idx.coeff(newFrameIdx_, i);
           if (hash_point.count(this_point)) {
-            graphA.feature_points.push_back(graphB.feature_points[point_ind2 - 1]);
+            graphA.feature_points.push_back(graphB.feature_points[point_ind1 - 1]);
             triplet.push_back(Eigen::Triplet<int>(num_frameA, hash_point[this_point], graphA.feature_points.size()));
             count++;
           }
           else {
-            int point_ind1 = graphB.feature_idx.coeff(newFrameIdx_, i);
             graphA.feature_points.push_back(graphB.feature_points[point_ind2 - 1]);
             triplet.push_back(Eigen::Triplet<int>(commonFrameIdx1_, num_point1, graphA.feature_points.size()));
             graphA.feature_points.push_back(graphB.feature_points[point_ind1 - 1]);
