@@ -247,11 +247,12 @@ namespace {
         }
       }
       std::cout << "candidate " << i << ": inliers " << count << "/" << Str.cols() << std::endl;
-      if (count > max_count) {
+      if ((count > max_count) || (count == max_count && abs(mot_candidate[i](2, 2) - 1) < abs(mot_candidate[max_idx](2, 2) - 1))) {
+        max_count = count;
         max_idx = i;
       }
     }
-    // std::cout << "candidate " << max_idx << " selected" << std::endl;
+    std::cout << "candidate " << max_idx << " selected" << std::endl;
     Mot = mot_candidate[max_idx];
     return Mot;
   }
