@@ -131,7 +131,7 @@ namespace {
 
     of << 0 << ' ' << 1 << ' ' << graph.Str(3, 1) << ' ' << graph.Str(4, 1) << ' ' << graph.Str(5, 1) << '\n';
     for (int i = 2; i < n_points; ++i) {
-      of << i - 1 << ' ' << i << ' ' << graph.Str(3, i) << ' ' << graph.Str(4, i) << ' ' << graph.Str(5, i) << '\n';
+      of << hash[i] << ' ' << i << ' ' << graph.Str(3, i) << ' ' << graph.Str(4, i) << ' ' << graph.Str(5, i) << '\n';
     }
 
     of.close();
@@ -318,7 +318,7 @@ namespace {
       }
     }
     std::cout << std::endl;
-    if (!controller->writeGraphToPLYFile(tmp_graph, "./output/camera_pos.ply")) {
+    if (!controller->writeGraphToPLYFile(tmp_graph, cur_preind,  "./output/camera_pos.ply")) {
       std::cerr << "Can not write the camera pos to .ply file";
     }
 
