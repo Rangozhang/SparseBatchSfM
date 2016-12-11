@@ -74,6 +74,7 @@ namespace {
       int frame1_pt_ind = feature_struct.feature_matches[frame1][frame2][i].row();
       tmp_pt.x = feature_struct.feature_point[frame1][frame1_pt_ind].pos(0);
       tmp_pt.y = feature_struct.feature_point[frame1][frame1_pt_ind].pos(1);
+      //std::cout << "1: " << tmp_pt << std::endl;
       tmp_pt.x /= img_width + 0.0;
       tmp_pt.y /= img_height + 0.0;
       pts1.push_back(tmp_pt);
@@ -81,8 +82,10 @@ namespace {
       int frame2_pt_ind = feature_struct.feature_matches[frame1][frame2][i].col();
       tmp_pt.x = feature_struct.feature_point[frame2][frame2_pt_ind].pos(0);
       tmp_pt.y = feature_struct.feature_point[frame2][frame2_pt_ind].pos(1);
+      //std::cout << "2: " << tmp_pt << std::endl;
       tmp_pt.x /= img_width + 0.0;
       tmp_pt.y /= img_height + 0.0;
+      //std::cout << "match: " << frame1_pt_ind << " " << frame2_pt_ind << std::endl;
       pts2.push_back(tmp_pt);
     }
 
@@ -93,7 +96,7 @@ namespace {
 
     cv::Mat mask;
     // 0.001 for visulation
-    cv::Mat f_mat = cv::findFundamentalMat(pts1, pts2, CV_FM_RANSAC, 0.0001, 0.99, mask);
+    cv::Mat f_mat = cv::findFundamentalMat(pts1, pts2, CV_FM_RANSAC, 0.0005, 0.99, mask);
     f_mat = scale * f_mat * scale;
 
     cv::cv2eigen(f_mat, F_);

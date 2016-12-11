@@ -8,7 +8,29 @@
 #include "opencv2/features2d/features2d.hpp"
 #include "opencv2/nonfree/features2d.hpp"
 
+
+struct point_pair {
+  double x1, y1, x2, y2;
+};
+bool operator == (const point_pair & pp1, const point_pair & pp2) {
+  return pp1.x1 == pp2.x1 && pp1.y1 == pp2.y1 && pp1.x2 == pp2.x2 && pp1.y2 == pp2.y2;
+}
+namespace std {
+  template<> struct hash<point_pair>
+  {
+    std::size_t operator()(point_pair const& pp) const
+    {
+      std::size_t const h1 (std::hash<double>{}(pp.x1));
+      std::size_t const h2 (std::hash<double>{}(pp.y1));
+      std::size_t const h3 (std::hash<double>{}(pp.x2));
+      std::size_t const h4 (std::hash<double>{}(pp.y2));
+      return (((h1 ^ (h2 << 1) >> 1) ^ (h3 << 1)) >> 1) ^ (h4 << 1);
+    }
+  };
+}
+
 namespace sparse_batch_sfm {
+
   bool FeatureProcessor::feature_match(const std::vector<std::unique_ptr<cv::Mat>>& image_seq,
                                        FeatureStruct& feature_struct,
                                        int minHessian = 400, float match_thres = 200, bool visualize = false) {
@@ -47,7 +69,7 @@ namespace sparse_batch_sfm {
   }
 
   // match features between each pair of images
-  std::vector<std::unordered_map<int, int>> hash(seq_len);
+  //std::vector<std::unordered_map<int, int>> hash(seq_len);
   std::vector<Eigen::Triplet<int>> triplet;
   cv::FlannBasedMatcher matcher;
   std::vector<cv::DMatch> matches;
@@ -61,11 +83,20 @@ namespace sparse_batch_sfm {
         // count the number of good matches
         std::vector<cv::DMatch> good_matches;
         int count = 0;
+        std::unordered_set<point_pair> hash_set;
         for(int n = 1; n < matches.size(); n++) {
           if(matches[n].distance < match_thres) {
-            this_this_match.push_back(Eigen::Triplet<double>(matches[n].queryIdx, matches[n].trainIdx));
-            good_matches.push_back(matches[n]);
-            count++;
+            point_pair pp;
+            pp.x1 = feature_struct.feature_point[i][matches[n].queryIdx].pos(0);
+            pp.y1 = feature_struct.feature_point[i][matches[n].queryIdx].pos(1);
+            pp.x2 = feature_struct.feature_point[j][matches[n].trainIdx].pos(0);
+            pp.y2 = feature_struct.feature_point[j][matches[n].trainIdx].pos(0);
+            if (hash_set.find(pp) == hash_set.end()) {
+              hash_set.insert(pp);
+              this_this_match.push_back(Eigen::Triplet<double>(matches[n].queryIdx, matches[n].trainIdx, matches[n].distance));
+              good_matches.push_back(matches[n]);
+              count++;
+            }
 /*
           std::unordered_map<int, int>::const_iterator got_i = hash[i].find(matches[n].queryIdx);
           if (got_i == hash[i].end()) {
@@ -122,7 +153,7 @@ namespace sparse_batch_sfm {
 
 //  for(int n = 0; n < triplet.size(); n++)
 //    std::cout << triplet[n].row() << ' ' << triplet[n].col() << ' ' << triplet[n].value() << std::endl;
- 
+
   return true;
   }
 
@@ -218,7 +249,7 @@ namespace sparse_batch_sfm {
         std::cout << "candidate: "; print_unordered_set(candidate);
         std::cout << "cur_ind: " << cur_ind << std::endl;
       }
-      
+
       // 3. store edge in mask
       mask(cur_ind_pre, cur_ind) = 1;
       mask(cur_ind, cur_ind_pre) = 1;
@@ -235,7 +266,7 @@ namespace sparse_batch_sfm {
         std::cout << "mask: " << std::endl << mask << std::endl;
         std::cout << std::endl;
       }
- 
+
     } while (!candidate.empty());
 
     std::cout << "adding leaves..." << std::endl;
@@ -269,8 +300,8 @@ namespace sparse_batch_sfm {
       std::cout << "mask: " << std::endl << mask << std::endl;
       std::cout << std::endl;
     }
- 
+
     return true;
   }
-  
+
 }
