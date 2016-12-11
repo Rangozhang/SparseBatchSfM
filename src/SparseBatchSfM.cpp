@@ -215,7 +215,10 @@ namespace {
       }
 
       // Merge two graphs
-      controller->graph_merge_->merge(controller->graphs_[0], controller->graphs_[ind]);
+      if (!controller->graph_merge_->merge(*controller->graphs_[0].get(), *controller->graphs_[ind].get())) {
+        std::cout << "Merging failed" << std::endl;
+        return;
+      }
 
       std::cout << "BundleAdjustment" <<std::endl;
       BundleAdjustment ba;

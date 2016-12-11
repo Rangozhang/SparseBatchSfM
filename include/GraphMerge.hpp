@@ -19,7 +19,8 @@ class GraphMerge {
   public: 
     bool merge(GraphStruct &graphA, const GraphStruct &graphB);
   private: 
-    int commonFrameIdx_;
+    int commonFrameIdx1_;
+    int commonFrameIdx2_;
     int newFrameIdx_;
 };
 
