@@ -224,6 +224,8 @@ namespace {
         std::cout << "MultiTriangulate failed" << std::endl;
         return;
       }
+      std::cout << "Multi-triangulate: " << std::endl;
+      std::cout << (*controller->graphs_[0].get()).Str.leftCols(5);
 
       std::cout << "BundleAdjustment" <<std::endl;
       BundleAdjustment ba;
