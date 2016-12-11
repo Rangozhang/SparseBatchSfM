@@ -220,6 +220,11 @@ namespace {
         return;
       }
 
+      if (!controller->graph_merge_->multiTriangulate(*controller->graphs_[0].get())) {
+        std::cout << "MultiTriangulate failed" << std::endl;
+        return;
+      }
+
       std::cout << "BundleAdjustment" <<std::endl;
       BundleAdjustment ba;
       ba.run(*controller->graphs_[0].get());

@@ -17,6 +17,7 @@ class GraphMerge {
     bool transformPtsByMot(const Eigen::MatrixXd& Mot, Eigen::Matrix<double, 6, Eigen::Dynamic>& Str);
     bool findCommonFrame(const std::vector<int> &frames1, const std::vector<int> &frames2);
   public: 
+    bool multiTriangulate(GraphStruct &graph);
     bool merge(GraphStruct &graphA, GraphStruct &graphB);
   private: 
     int commonFrameIdx1_;

@@ -2,6 +2,8 @@
 #include <unordered_map>
 #include "opencv2/core/core.hpp"
 
+#include <Eigen/SVD>
+
 struct point_2d {
   double x, y;
 };
@@ -54,6 +56,46 @@ namespace sparse_batch_sfm {
       return true;
     }
 
+    bool GraphMerge::multiTriangulate(GraphStruct& graph) {
+      int n_frames = graph.frame_idx.size();
+      int n_3dpt = graph.feature_idx.cols();
+      // For each Point, use SVD to recover the 3d P
+      for (int i = 0; i < n_3dpt; ++i) {
+        std::vector<int> validFrameIdx = {};
+        std::vector<int> featureIdxForValidFrame = {};
+        for (int j = 0; j < n_frames; ++j) {
+          int feature_point_idxp1 = graph.feature_idx.coeff(j, i);
+          if (feature_point_idxp1 > 0) {
+            validFrameIdx.push_back(j);
+            featureIdxForValidFrame.push_back(feature_point_idxp1-1);
+          }
+        }
+        int n_valid_frames = featureIdxForValidFrame.size();
+        Eigen::MatrixXd A(2*n_valid_frames, 4);
+
+        for (int k = 0; k < n_valid_frames; ++k) {
+          // get the pos
+          int x = graph.feature_points[featureIdxForValidFrame[k]].pos(0);
+          int y = graph.feature_points[featureIdxForValidFrame[k]].pos(1);
+
+          Eigen::MatrixXd Mi = graph.K[validFrameIdx[k]] * graph.Mot[validFrameIdx[k]];
+
+          // [x*m_3' - m_1'] 
+          // [y*m_3' - m_2'] P = 0
+          // [x*m_3' - m_1'] 
+          // [y*m_3' - m_2'] 
+          A.row(2*k)   = x * Mi.row(2) - Mi.row(0);
+          A.row(2*k+1) = y * Mi.row(2) - Mi.row(1);
+        }
+
+        Eigen::JacobiSVD<Eigen::MatrixXd> svd(A, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        Eigen::MatrixXd raw_str = svd.matrixV().rightCols(1);
+        raw_str = raw_str / raw_str(3, 0);
+        graph.Str.block(0, i, 3, 1) = raw_str.topRows(3);
+      }
+      return true;
+    }
+
     bool GraphMerge::merge(GraphStruct &graphA, GraphStruct &graphB) {
       // find common frame and new frame
       if (!findCommonFrame(graphA.frame_idx, graphB.frame_idx)) {
@@ -75,9 +117,17 @@ namespace sparse_batch_sfm {
 
       // transform graphB into the world coordinate of graphA
       Eigen::MatrixXd MotBwAw = concatenateMots(inverseMot(graphA.Mot[commonFrameIdx1_]), graphB.Mot[commonFrameIdx2_]);
+      std::cout << "Motion for graphB into the world coordinate of graphA: " << std::endl;
+      std::cout << MotBwAw << std::endl;
+
+      std::cout << "Graph Structure:" << std::endl;
+      std::cout << graphA.Str.leftCols(5) << std::endl;
+      std::cout << graphB.Str.leftCols(5) << std::endl;
       if (!transformPtsByMot(MotBwAw, graphB.Str)) {
         return false;
       }
+      std::cout << graphB.Str.leftCols(5) << std::endl;
+
       graphA.frame_idx.push_back(graphB.frame_idx[newFrameIdx_]);
       graphA.Mot.push_back(concatenateMots(graphB.Mot[newFrameIdx_], inverseMot(MotBwAw)));
       graphA.K.push_back(graphB.K[newFrameIdx_]);
