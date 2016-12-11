@@ -1,3 +1,4 @@
+#include "GraphMerge.hpp"
 
 namespace sparse_batch_sfm {
 
