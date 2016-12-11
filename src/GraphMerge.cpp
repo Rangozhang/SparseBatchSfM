@@ -38,8 +38,8 @@ namespace sparse_batch_sfm {
       Eigen::MatrixXd Mot(3, 4);
       // Mot * X = MotOuter * MotInner * X
       Eigen::Matrix3d Ro = MotOuter.leftCols(3);
-      Eigen::Matrix3d Ri = MotOuter.leftCols(3);
-      Eigen::MatrixXd to = MotInner.rightCols(1);
+      Eigen::Matrix3d Ri = MotInner.leftCols(3);
+      Eigen::MatrixXd to = MotOuter.rightCols(1);
       Eigen::MatrixXd ti = MotInner.rightCols(1);
       Mot.leftCols(3) = Ro * Ri;
       Mot.rightCols(1) = Ro * ti + to;
