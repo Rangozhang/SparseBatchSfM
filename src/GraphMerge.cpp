@@ -115,23 +115,6 @@ namespace sparse_batch_sfm {
 
       std::cout << "common frame index 1: " << commonFrameIdx1_ << "; common frame index 2: " << commonFrameIdx2_ << "; new frame index 2: " << newFrameIdx_ << std::endl;
 
-      // transform graphB into the world coordinate of graphA
-      Eigen::MatrixXd MotBwAw = concatenateMots(inverseMot(graphA.Mot[commonFrameIdx1_]), graphB.Mot[commonFrameIdx2_]);
-      std::cout << "Motion for graphB into the world coordinate of graphA: " << std::endl;
-      std::cout << MotBwAw << std::endl;
-
-      std::cout << "Graph Structure:" << std::endl;
-      std::cout << graphA.Str.leftCols(5) << std::endl;
-      std::cout << graphB.Str.leftCols(5) << std::endl;
-      if (!transformPtsByMot(MotBwAw, graphB.Str)) {
-        return false;
-      }
-      std::cout << graphB.Str.leftCols(5) << std::endl;
-
-      graphA.frame_idx.push_back(graphB.frame_idx[newFrameIdx_]);
-      graphA.Mot.push_back(concatenateMots(graphB.Mot[newFrameIdx_], inverseMot(MotBwAw)));
-      graphA.K.push_back(graphB.K[newFrameIdx_]);
-
       // update the merged graph
       // put the points in the common frame into hash table
       std::unordered_map<point_2d, int> hash_point;
@@ -161,6 +144,7 @@ namespace sparse_batch_sfm {
       */
       int num_point2 = graphB.feature_idx.cols();
       int count = 0;
+      std::vector<Eigen::Vector3d> str1, str2;
       for (int i = 0; i < num_point2; i++) {
         int point_ind2 = graphB.feature_idx.coeff(commonFrameIdx2_, i);
         if (point_ind2 > 0) {
@@ -171,6 +155,8 @@ namespace sparse_batch_sfm {
           if (hash_point.count(this_point)) {
             graphA.feature_points.push_back(graphB.feature_points[point_ind1 - 1]);
             triplet.push_back(Eigen::Triplet<int>(num_frameA, hash_point[this_point], graphA.feature_points.size()));
+            str1.push_back(graphA.Str.block(0,i,3,1));
+            str2.push_back(graphB.Str.block(0,hash_point[this_point],3,1));
             count++;
           }
           else {
@@ -193,6 +179,22 @@ namespace sparse_batch_sfm {
       */
       std::cout << "Number of common points " << count << "/" << num_point2 << std::endl;
 
+      // transform graphB into the world coordinate of graphA
+      Eigen::MatrixXd MotBwAw = concatenateMots(inverseMot(graphA.Mot[commonFrameIdx1_]), graphB.Mot[commonFrameIdx2_]);
+      std::cout << "Motion for graphB into the world coordinate of graphA: " << std::endl;
+      std::cout << MotBwAw << std::endl;
+
+      std::cout << "Graph Structure:" << std::endl;
+      std::cout << graphA.Str.leftCols(5) << std::endl;
+      std::cout << graphB.Str.leftCols(5) << std::endl;
+      if (!transformPtsByMot(MotBwAw, graphB.Str)) {
+        return false;
+      }
+      std::cout << graphB.Str.leftCols(5) << std::endl;
+
+      graphA.frame_idx.push_back(graphB.frame_idx[newFrameIdx_]);
+      graphA.Mot.push_back(concatenateMots(graphB.Mot[newFrameIdx_], inverseMot(MotBwAw)));
+      graphA.K.push_back(graphB.K[newFrameIdx_]);
       graphA.feature_idx.resize(num_frameA + 1, num_point1);
       graphA.feature_idx.setFromTriplets(triplet.begin(), triplet.end());
       Eigen::Matrix<double, 6, Eigen::Dynamic> Str_temp = graphA.Str;
