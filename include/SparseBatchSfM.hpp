@@ -8,6 +8,7 @@
 #include "FeatureProcessor.hpp"
 #include "TwoViewReconstruction.hpp"
 #include "BundleAdjustment.hpp"
+#include "GraphMerge.hpp"
 #include "utils.hpp"
 
 namespace sparse_batch_sfm {
@@ -29,6 +30,7 @@ class SparseBatchSfM {
   std::unique_ptr<ImageCapture> image_capture_;
   std::unique_ptr<FeatureProcessor> feature_processor_;
   std::unique_ptr<TwoViewReconstruction> twoview_reconstruction_;
+  std::unique_ptr<GraphMerge> graph_merge_;
 
  private:
   // input video sequence

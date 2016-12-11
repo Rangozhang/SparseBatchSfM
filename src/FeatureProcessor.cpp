@@ -239,7 +239,7 @@ namespace sparse_batch_sfm {
         }
       }
       if (cur_ind == -1) {
-          std::cout << "No valid neighbors for the previous ind" << std::endl;
+          std::cout << "No valid neighbors for the previous ind, CDS building finished" << std::endl;
           break;
       }
       candidate.erase(cur_ind);

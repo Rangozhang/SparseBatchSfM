@@ -48,12 +48,14 @@ namespace {
     image_capture_.reset(new ImageCapture());
     feature_processor_.reset(new FeatureProcessor());
     twoview_reconstruction_.reset(new TwoViewReconstruction());
+    graph_merge_.reset(new GraphMerge());
   }
 
   SparseBatchSfM::~SparseBatchSfM() {
     image_capture_.reset();
     feature_processor_.reset();
     twoview_reconstruction_.reset();
+    graph_merge_.reset(new GraphMerge());
   }
 
   SparseBatchSfM* SparseBatchSfM::instance_ = nullptr;
@@ -191,36 +193,48 @@ namespace {
 
     /****** Merge graphs ******/
     std::cout << "Merge Graphs" << std::endl;
-    // std::unordered_set<int> visited_frames;
-    // for (const auto& idx : controller->graphs_[0]->frame_idx) {
-    //   visited_frames.insert(idx);
-    // }
-    // while (controller->graphs_.size() > 1) {
-    //   int ind = 1;
-    //   // The order of the graph array has been sorted according to matches
-    //   for (int i = 1; i < controller->graphs_.size(); ++i) {
-    //     if (hasIdxInHashSet(controller->graphs_[i]->frame_idx, visited_frames)) {
-    //       ind = i;
-    //       break;
-    //     }
-    //   }
+    std::unordered_set<int> visited_frames;
+    for (const auto& idx : controller->graphs_[0]->frame_idx) {
+      visited_frames.insert(idx);
+    }
 
-    //   // merge the second one to the first one
-    //   // merge(graphs_[0], graphs_[ind]);
+    int merge_count = 0;
+    while (controller->graphs_.size() > 1) {
+      int ind = 1;
+      // The order of the graph array has been sorted according to matches
+      for (int i = 1; i < controller->graphs_.size(); ++i) {
+        if (hasIdxInHashSet(controller->graphs_[i]->frame_idx, visited_frames)) {
+          std::cout << "Merging Graph with frame ";
+          for (int frame : controller->graphs_[i]->frame_idx) {
+            std::cout << std::to_string(frame) << ' ';
+          }
+          std::cout << std::endl;
+          ind = i;
+          break;
+        }
+      }
 
-    //   // bundleadjustment(graphs_[0]);
+      // Merge two graphs
+      controller->graph_merge_->merge(controller->graphs_[0], controller->graphs_[ind]);
 
-    //   // put the new vertex in to hash set
-    //   for (const auto& frame_idx : controller->graphs_[ind]->frame_idx) {
-    //     visited_frames.insert(frame_idx);
-    //   }
+      std::cout << "BundleAdjustment" <<std::endl;
+      BundleAdjustment ba;
+      ba.run(*controller->graphs_[0].get());
 
-    //   controller->graphs_.erase(controller->graphs_.begin() + ind);
-    // }
+      std::string tmp_file = "output/tmp_merge_" + std::to_string(merge_count++) + ".ply";
+      controller->writeGraphToPLYFile(*controller->graphs_[0].get(), tmp_file.c_str());
 
-    // if (!controller->writeGraphToPLYFile(controller->graphs_, "./result.ply")) {
-    //   std::cerr << "Can not write the structure to .ply file.";
-    // }
+      // put the new vertex in to hash set
+      for (const auto& frame_idx : controller->graphs_[ind]->frame_idx) {
+        visited_frames.insert(frame_idx);
+      }
+
+      controller->graphs_.erase(controller->graphs_.begin() + ind);
+    }
+
+    if (!controller->writeGraphToPLYFile(*controller->graphs_[0].get(), "./output/result.ply")) {
+      std::cerr << "Can not write the structure to .ply file.";
+    }
 
     return;
   }

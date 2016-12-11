@@ -30,11 +30,13 @@ add_library(TwoViewReconstruction ${inc}/TwoViewReconstruction.hpp ${src}/TwoVie
 target_link_libraries(TwoViewReconstruction ${OpenCV_LIBS})
 #target_link_libraries(TwoViewReconstruction BundleAdjustment)
 
+add_library(GraphMerge ${inc}/GraphMerge.hpp ${src}/GraphMerge.cpp)
+
 add_library(SparseBatchSfM ${inc}/SparseBatchSfM.hpp ${src}/SparseBatchSfM.cpp)
 
 # add_executable(main ${src}/main.cpp ${inc}/utils.hpp ${src}/utils.cpp ${inc}/ImageCapture.hpp ${src}/ImageCapture.cpp ${inc}/protos.hpp ${inc}/FeatureProcessor.hpp ${src}/FeatureProcessor.cpp ${inc}/BundleAdjustment.hpp ${src}/BundleAdjustment.cpp ${inc}/TwoViewReconstruction.hpp ${src}/TwoViewReconstruction.cpp ${inc}/SparseBatchSfM.hpp ${src}/SparseBatchSfM.cpp)
 add_executable(main ${src}/main.cpp)
 # target_link_libraries(main ${OpenCV_LIBS} ${CMAKE_THREAD_LIBS_INIT} glog SparseBatchSfM ImageCapture Util Protos FeatureProcessor TwoViewReconstruction BundleAdjustment)
-target_link_libraries(main ${OpenCV_LIBS} ceres ${GLOG_LIBRARIES} SparseBatchSfM ImageCapture Util Protos FeatureProcessor TwoViewReconstruction BundleAdjustment)
+target_link_libraries(main ${OpenCV_LIBS} ceres ${GLOG_LIBRARIES} SparseBatchSfM ImageCapture Util Protos FeatureProcessor TwoViewReconstruction BundleAdjustment GraphMerge)
 # target_link_libraries(main ${OpenCV_LIBS} ceres ${CERES_LIBRARIES} ${GLOG_LIBRARIES})
 add_definitions(-std=c++11)

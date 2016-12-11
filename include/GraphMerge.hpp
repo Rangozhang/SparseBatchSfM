@@ -6,15 +6,15 @@
 #include <memory>
 #include <Eigen/Dense>
 
-#include "proto.hpp"
+#include "protos.hpp"
 
 namespace sparse_batch_sfm {
 
 class GraphMerge {
   private:
-    void inverseRt(const MatrixXd& Rt, MatrixXd& reveredRt);
+    void inverseRt(const Eigen::MatrixXd& Rt, Eigen::MatrixXd& reveredRt);
     // void concatenateRts(RtOuter, RtInner, )
-}
+};
 
 }
 
