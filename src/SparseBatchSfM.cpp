@@ -28,6 +28,11 @@ namespace {
         edges.push_back(Edge(i, j, sk(i, j)));
       }
     }
+    // for (int i = 0; i < len-1; ++i) {
+    // for (int i = len-2; i >= 0; --i) {
+    //   std::cout << i << ' ' << i+1 << ' ' << sk(i, i+1) << std::endl;
+    //   edges.push_back(Edge(i, i+1, sk(i, i+1)));
+    // }
     std::sort(edges.begin(), edges.end(),
             [](const Edge& edge1, const Edge& edge2){return edge1.weight > edge2.weight;});
     return;
@@ -133,14 +138,16 @@ namespace {
     //                                         0,  0, 0, 0, 0, 8, 5, 0;
     // controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 0);
     // std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
-    controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 150);
+    controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 140);
 
     std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
     std::vector<Edge> edges = {};
     convertToVectors(controller->feature_struct_.skeleton, edges);
     if (!edges.size()) {
+      std::cout << "edges size 0" << std::endl;
       return;
     }
+    // return;
     // for (const auto& edge : edges) {
     //     std::cout << edge.idx1 << ' ' << edge.idx2 << ' ' << edge.weight << std::endl;
     // }
@@ -224,8 +231,8 @@ namespace {
         std::cout << "MultiTriangulate failed" << std::endl;
         return;
       }
-      std::cout << "Multi-triangulate: " << std::endl;
-      std::cout << (*controller->graphs_[0].get()).Str.leftCols(5);
+      // std::cout << "Multi-triangulate: " << std::endl;
+      // std::cout << (*controller->graphs_[0].get()).Str.leftCols(5);
 
       std::cout << "BundleAdjustment" <<std::endl;
       BundleAdjustment ba;

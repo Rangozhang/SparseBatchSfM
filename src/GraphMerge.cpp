@@ -185,13 +185,15 @@ namespace sparse_batch_sfm {
       Eigen::MatrixXd M2 = graphB.Mot[commonFrameIdx2_];
       Eigen::MatrixXd dis2 = M2.leftCols(3) * (graphB.Str.block(0, str2[i], 3, 1) - M2.rightCols(1));
       // std::cout << "GraphA/GraphB dist:";
-      // std::cout << dis1.norm() << ' '<< dis2.norm() << std::endl;
-          // << " ptA: " << graphA.Str.block(0, str1[i]) << graphA.Str.block(0, str1[i]) << std::endl;
+      // std::cout << dis1.norm() << ' '<< dis2.norm()
+      //   << " ptA: " << graphA.Str(0, str1[i]) << ' ' << graphA.Str(1, str1[i]) << ' ' << graphA.Str(2, str1[i])
+      //   << " ptB: " << graphB.Str(0, str2[i]) << ' ' << graphB.Str(1, str2[i]) << ' ' << graphB.Str(2, str2[i])
+      //   << std::endl;
       averaged_ratio += dis1.norm()/dis2.norm();
     }
     averaged_ratio /= str1.size();
 
-    // std::cout << "Avergaed scale ratio: " << averaged_ratio << std::endl;
+    std::cout << "Avergaed scale ratio: " << averaged_ratio << std::endl;
     for (int i = 0; i < graphB.Mot.size(); ++i) {
       graphB.Mot[i].rightCols(1) = graphB.Mot[i].rightCols(1) * averaged_ratio;
     }
@@ -201,14 +203,7 @@ namespace sparse_batch_sfm {
     // BundleAdjustment ba;
     // ba.run(graphB);
 
-    for (int i = 0; i < str1.size(); ++i) {
-      Eigen::MatrixXd M1 = graphA.Mot[commonFrameIdx1_];
-      Eigen::MatrixXd dis1 = M1.leftCols(3) * (graphA.Str.block(0, str1[i], 3, 1) - M1.rightCols(1));
-      Eigen::MatrixXd M2 = graphB.Mot[commonFrameIdx2_];
-      Eigen::MatrixXd dis2 = M2.leftCols(3) * (graphB.Str.block(0, str2[i], 3, 1) - M2.rightCols(1));
-      // std::cout << "GraphA/GraphB dist (re-scaled):";
-      // std::cout << dis1.norm() << ' '<< dis2.norm() << std::endl;
-    }
+    
     /*
     for (int i = 0; i < triplet.size(); i++) {
       std::cout << triplet[i].row() << " " << triplet[i].col() << " " << triplet[i].value() << std::endl;
@@ -233,6 +228,18 @@ namespace sparse_batch_sfm {
     }
     // std::cout << "GraphB Structure after transformation:" << std::endl;
     // std::cout << graphB.Str.leftCols(5) << std::endl;
+
+    for (int i = 0; i < str1.size(); ++i) {
+      Eigen::MatrixXd M1 = graphA.Mot[commonFrameIdx1_];
+      Eigen::MatrixXd dis1 = M1.leftCols(3) * (graphA.Str.block(0, str1[i], 3, 1) - M1.rightCols(1));
+      Eigen::MatrixXd M2 = graphB.Mot[commonFrameIdx2_];
+      Eigen::MatrixXd dis2 = M2.leftCols(3) * (graphB.Str.block(0, str2[i], 3, 1) - M2.rightCols(1));
+      // std::cout << "GraphA/GraphB dist (re-scaled):";
+      // std::cout << dis1.norm() << ' '<< dis2.norm()
+      //   << " ptA: " << graphA.Str(0, str1[i]) << ' ' << graphA.Str(1, str1[i]) << ' ' << graphA.Str(2, str1[i])
+      //   << " ptB: " << graphB.Str(0, str2[i]) << ' ' << graphB.Str(1, str2[i]) << ' ' << graphB.Str(2, str2[i])
+      //   << std::endl;
+    }
 
     graphA.frame_idx.push_back(graphB.frame_idx[newFrameIdx_]);
     graphA.Mot.push_back(concatenateMots(graphB.Mot[newFrameIdx_], inverseMot(MotBwAw)));
