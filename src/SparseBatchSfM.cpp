@@ -167,9 +167,6 @@ namespace {
         //   std::cout << graph->Str(0, i) << ' ' << graph->Str(1, i) << ' ' << graph->Str(2, i) << std::endl;
         // }
 
-        std::string two_view_file = "output/TwoView_" + std::to_string(edge.idx1) + "_" + std::to_string(edge.idx2) + ".ply";
-        controller->writeGraphToPLYFile(*graph.get(), two_view_file.c_str());
-
         // BundleAdjustment
         std::cout << "BundleAdjustment" <<std::endl;
         // std::cout << graph->Str(0, 0) << ' ' << graph->Str(1, 0)
@@ -178,6 +175,10 @@ namespace {
 
         BundleAdjustment ba;
         ba.run(*graph.get());
+
+        std::string two_view_file = "output/TwoView_" + std::to_string(edge.idx1) + "_" + std::to_string(edge.idx2) + ".ply";
+        controller->writeGraphToPLYFile(*graph.get(), two_view_file.c_str());
+
 
         // std::cout << graph->Str(0, 0) << ' ' << graph->Str(1, 0)
 	    //  		 << ' ' << graph->Str(2, 0) << std::endl;
