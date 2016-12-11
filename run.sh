@@ -1,1 +1,1 @@
-BUILD/main input/temple
+BUILD/main images/temple
