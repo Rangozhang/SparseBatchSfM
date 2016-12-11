@@ -207,7 +207,7 @@ namespace {
     }
 
     int merge_count = 0;
-    std::unordered_map<int, int> cur_preind = {};
+    std::unordered_map<int, int> curind_preind = {};
     while (controller->graphs_.size() > 1) {
       int ind = 1;
       // The order of the graph array has been sorted according to matches
@@ -244,19 +244,16 @@ namespace {
       controller->writeGraphToPLYFile(*controller->graphs_[0].get(), tmp_file.c_str());
 
       // put the new vertex in to hash set
-      int cur = 0, pre = 0;
+      int pre = 0;
       for (const auto& frame_idx : controller->graphs_[ind]->frame_idx) {
         if (visited_frames.count(frame_idx)) {
           pre = frame_idx;
-        } else {
-          cur = frame_idx;
-        }
+        } 
         visited_frames.insert(frame_idx);
       }
       for (int i = 0; i < controller->graphs_[0]->frame_idx.size(); ++i) {
         if (controller->graphs_[0]->frame_idx[i] == pre) {
-          // std::cout << "cur_preind: " << cur << ' ' << i << std::endl;
-          cur_preind[cur] = i;
+          curind_preind[controller->graphs_[0]->frame_idx.size()] = i;
           break;
         }
       }
