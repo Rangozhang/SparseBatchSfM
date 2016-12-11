@@ -265,7 +265,7 @@ namespace {
     }
 
     GraphStruct tmp_graph;
-    tmp_graph.Str.resize(6, seq_len); 
+    tmp_graph.Str.resize(6, seq_len);
     std::cout << "Frame merge order: ";
     for (int i = 0; i < seq_len; ++i) {
       std::cout << controller->graphs_[0]->frame_idx[i] << " ";

@@ -199,7 +199,7 @@ namespace sparse_batch_sfm {
     }
 
     // re-triangulation
-    multiTriangulate(graphB);
+    //multiTriangulate(graphB);
     // BundleAdjustment ba;
     // ba.run(graphB);
 
