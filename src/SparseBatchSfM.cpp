@@ -204,11 +204,11 @@ namespace {
       // The order of the graph array has been sorted according to matches
       for (int i = 1; i < controller->graphs_.size(); ++i) {
         if (hasIdxInHashSet(controller->graphs_[i]->frame_idx, visited_frames)) {
-          std::cout << "Merging Graph with frame ";
+          /*std::cout << "Merging Graph with frame ";
           for (int frame : controller->graphs_[i]->frame_idx) {
             std::cout << std::to_string(frame) << ' ';
           }
-          std::cout << std::endl;
+          std::cout << std::endl;*/
           ind = i;
           break;
         }

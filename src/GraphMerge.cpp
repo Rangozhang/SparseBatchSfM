@@ -59,15 +59,28 @@ namespace sparse_batch_sfm {
       if (!findCommonFrame(graphA.frame_idx, graphB.frame_idx)) {
         return false;
       }
+      int num_frameA = graphA.frame_idx.size();
+
+      std::cout << "graph A frames: ";
+      for (int i = 0; i < graphA.frame_idx.size(); i++) {
+        std::cout << graphA.frame_idx[i] << " ";
+      }
+      std::cout << std::endl << "graph B frames: ";
+      for (int i = 0; i < graphB.frame_idx.size(); i++) {
+        std::cout << graphB.frame_idx[i] << " ";
+      }
+      std::cout << std::endl;
+
+      std::cout << "common frame index 1: " << commonFrameIdx1_ << "; common frame index 2: " << commonFrameIdx2_ << "; new frame index 2: " << newFrameIdx_ << std::endl;
 
       // transform graphB into the world coordinate of graphA
       Eigen::MatrixXd MotBwAw = concatenateMots(inverseMot(graphA.Mot[commonFrameIdx1_]), graphB.Mot[commonFrameIdx2_]);
       if (!transformPtsByMot(MotBwAw, graphB.Str)) {
         return false;
       }
-      // TODO: determine where to put this following line
-      // graphA.frame_idx.push_back(graphB.frame_idx[newFrameIdx_]);
+      graphA.frame_idx.push_back(graphB.frame_idx[newFrameIdx_]);
       graphA.Mot.push_back(concatenateMots(graphB.Mot[newFrameIdx_], inverseMot(MotBwAw)));
+      graphA.K.push_back(graphB.K[newFrameIdx_]);
 
       // update the merged graph
       // put the points in the common frame into hash table
@@ -100,33 +113,26 @@ namespace sparse_batch_sfm {
       int count = 0;
       for (int i = 0; i < num_point2; i++) {
         int point_ind2 = graphB.feature_idx.coeff(commonFrameIdx2_, i);
+        //std::cout << point_ind2 << std::endl;
         if (point_ind2 > 0) {
           point_2d this_point;
           this_point.x = graphB.feature_points[point_ind2 - 1].pos(0);
           this_point.y = graphB.feature_points[point_ind2 - 1].pos(1);
           if (hash_point.count(this_point)) {
             graphA.feature_points.push_back(graphB.feature_points[point_ind2 - 1]);
-            triplet.push_back(Eigen::Triplet<int>(graphA.frame_idx.size(), hash_point[this_point], graphA.feature_points.size()));
+            triplet.push_back(Eigen::Triplet<int>(num_frameA, hash_point[this_point], graphA.feature_points.size()));
             count++;
           }
           else {
             int point_ind1 = graphB.feature_idx.coeff(newFrameIdx_, i);
-            graphA.feature_points.push_back(graphB.feature_points[point_ind1 - 1]);
-            triplet.push_back(Eigen::Triplet<int>(commonFrameIdx1_, num_point1, graphA.feature_points.size()));
             graphA.feature_points.push_back(graphB.feature_points[point_ind2 - 1]);
-            triplet.push_back(Eigen::Triplet<int>(graphA.frame_idx.size(), num_point1, graphA.feature_points.size()));
+            triplet.push_back(Eigen::Triplet<int>(commonFrameIdx1_, num_point1, graphA.feature_points.size()));
+            graphA.feature_points.push_back(graphB.feature_points[point_ind1 - 1]);
+            triplet.push_back(Eigen::Triplet<int>(num_frameA, num_point1, graphA.feature_points.size()));
             unseen_idx.push_back(i);
             num_point1++;
           }
         }
-      }
-      graphA.feature_idx.resize(graphA.frame_idx.size() + 1, num_point1);
-      graphA.feature_idx.setFromTriplets(triplet.begin(), triplet.end());
-      Eigen::Matrix<double, 6, Eigen::Dynamic> Str_temp = graphA.Str;
-      graphA.Str.resize(6, num_point1);
-      graphA.Str.leftCols(Str_temp.cols()) = Str_temp;
-      for (int i = 0; i < unseen_idx.size(); i++) {
-        graphA.Str.col(Str_temp.cols() + i) = graphB.Str.col(unseen_idx[i]);
       }
       /*
       for (int i = 0; i < triplet.size(); i++) {
@@ -138,14 +144,14 @@ namespace sparse_batch_sfm {
       */
       std::cout << "Number of common points " << count << "/" << num_point2 << std::endl;
 
-      for (int i = 0; i < graphA.frame_idx.size(); i++) {
-        std::cout << graphA.frame_idx[i] << std::endl;
+      graphA.feature_idx.resize(num_frameA + 1, num_point1);
+      graphA.feature_idx.setFromTriplets(triplet.begin(), triplet.end());
+      Eigen::Matrix<double, 6, Eigen::Dynamic> Str_temp = graphA.Str;
+      graphA.Str.resize(6, num_point1);
+      graphA.Str.leftCols(Str_temp.cols()) = Str_temp;
+      for (int i = 0; i < unseen_idx.size(); i++) {
+        graphA.Str.col(Str_temp.cols() + i) = graphB.Str.col(unseen_idx[i]);
       }
-      for (int i = 0; i < graphB.frame_idx.size(); i++) {
-        std::cout << graphB.frame_idx[i] << std::endl;
-      }
-
-      std::cout << commonFrameIdx1_ << " " << commonFrameIdx2_ << " " << newFrameIdx_ << std::endl;
 
       return true;
     }
