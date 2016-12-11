@@ -22,14 +22,52 @@ namespace std {
 
 namespace sparse_batch_sfm {
 
-    bool GraphMerge::merge(GraphStruct &graphA, const GraphStruct &graphB) {
+    Eigen::MatrixXd GraphMerge::inverseMot(const Eigen::MatrixXd& Mot) {
+      Eigen::MatrixXd inversedMot(3, 4);
+      Eigen::Matrix3d R = Mot.leftCols(3);
+      Eigen::MatrixXd t = Mot.rightCols(1);
+      // inversedMot = [R', -R'*t]
+      inversedMot.leftCols(3) = R.transpose();
+      inversedMot.rightCols(1) = -R.transpose() * t;
+      return inversedMot;
+    }
+
+    Eigen::MatrixXd GraphMerge::concatenateMots(const Eigen::MatrixXd& MotOuter, const Eigen::MatrixXd& MotInner) {
+      Eigen::MatrixXd Mot(3, 4);
+      // Mot * X = MotOuter * MotInner * X
+      Eigen::Matrix3d Ro = MotOuter.leftCols(3);
+      Eigen::Matrix3d Ri = MotOuter.leftCols(3);
+      Eigen::MatrixXd to = MotInner.rightCols(1);
+      Eigen::MatrixXd ti = MotInner.rightCols(1);
+      Mot.leftCols(3) = Ro * Ri;
+      Mot.rightCols(1) = Ro * ti + to;
+      return Mot;
+    }
+
+    bool GraphMerge::transformPtsByMot(const Eigen::MatrixXd& Mot, Eigen::Matrix<double, 6, Eigen::Dynamic>& Str) {
+      if (Mot.rows() != 3 || Mot.cols() != 4) {
+        std::cout << "Invalid Mot" << std::endl;
+        return false;
+      }
+      int str_len = Str.cols();
+      Str.topRows(3) = Mot.leftCols(3) * Str.topRows(3) + Mot.rightCols(1).replicate(1, str_len);
+      return true;
+    }
+
+    bool GraphMerge::merge(GraphStruct &graphA, GraphStruct &graphB) {
       // find common frame and new frame
       if (!findCommonFrame(graphA.frame_idx, graphB.frame_idx)) {
         return false;
       }
 
       // transform graphB into the world coordinate of graphA
-
+      Eigen::MatrixXd MotBwAw = concatenateMots(inverseMot(graphA.Mot[commonFrameIdx1_]), graphB.Mot[commonFrameIdx2_]);
+      if (!transformPtsByMot(MotBwAw, graphB.Str)) {
+        return false;
+      }
+      // TODO: determine where to put this following line
+      // graphA.frame_idx.push_back(graphB.frame_idx[newFrameIdx_]);
+      graphA.Mot.push_back(concatenateMots(graphB.Mot[newFrameIdx_], inverseMot(MotBwAw)));
 
       // update the merged graph
       // put the points in the common frame into hash table

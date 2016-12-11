@@ -12,12 +12,12 @@ namespace sparse_batch_sfm {
 
 class GraphMerge {
   private:
-    void inverseRt(const Eigen::MatrixXd& Rt, Eigen::MatrixXd& reveredRt);
-    void concatenateRts(const Eigen::MatrixXd& RtOuter, const Eigen::MatrixXd& RtInner, Eigen::MatrixXd& Rt);
-    void transformPtsByRt(const Eigen::MatrixXd& X3D, const Eigen::MatrixXd& Rt, Eigen::MatrixXd& Y3D);
+    Eigen::MatrixXd inverseMot(const Eigen::MatrixXd& Mot);
+    Eigen::MatrixXd concatenateMots(const Eigen::MatrixXd& MotOuter, const Eigen::MatrixXd& MotInner);
+    bool transformPtsByMot(const Eigen::MatrixXd& Mot, Eigen::Matrix<double, 6, Eigen::Dynamic>& Str);
     bool findCommonFrame(const std::vector<int> &frames1, const std::vector<int> &frames2);
   public: 
-    bool merge(GraphStruct &graphA, const GraphStruct &graphB);
+    bool merge(GraphStruct &graphA, GraphStruct &graphB);
   private: 
     int commonFrameIdx1_;
     int commonFrameIdx2_;
