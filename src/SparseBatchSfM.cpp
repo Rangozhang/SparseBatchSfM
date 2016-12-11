@@ -28,6 +28,11 @@ namespace {
         edges.push_back(Edge(i, j, sk(i, j)));
       }
     }
+    // for (int i = 0; i < len-1; ++i) {
+    // for (int i = len-2; i >= 0; --i) {
+    //   std::cout << i << ' ' << i+1 << ' ' << sk(i, i+1) << std::endl;
+    //   edges.push_back(Edge(i, i+1, sk(i, i+1)));
+    // }
     std::sort(edges.begin(), edges.end(),
             [](const Edge& edge1, const Edge& edge2){return edge1.weight > edge2.weight;});
     return;
@@ -139,8 +144,10 @@ namespace {
     std::vector<Edge> edges = {};
     convertToVectors(controller->feature_struct_.skeleton, edges);
     if (!edges.size()) {
+      std::cout << "edges size 0" << std::endl;
       return;
     }
+    // return;
     // for (const auto& edge : edges) {
     //     std::cout << edge.idx1 << ' ' << edge.idx2 << ' ' << edge.weight << std::endl;
     // }
@@ -194,8 +201,10 @@ namespace {
     /****** Merge graphs ******/
     std::cout << "Merge Graphs" << std::endl;
     std::unordered_set<int> visited_frames;
+    std::vector<int> merge_order = {};
     for (const auto& idx : controller->graphs_[0]->frame_idx) {
       visited_frames.insert(idx);
+      merge_order.push_back(idx);
     }
 
     int merge_count = 0;
@@ -224,8 +233,8 @@ namespace {
         std::cout << "MultiTriangulate failed" << std::endl;
         return;
       }
-      //std::cout << "Multi-triangulate: " << std::endl;
-      //std::cout << (*controller->graphs_[0].get()).Str.leftCols(5);
+      // std::cout << "Multi-triangulate: " << std::endl;
+      // std::cout << (*controller->graphs_[0].get()).Str.leftCols(5);
 
       std::cout << "BundleAdjustment" <<std::endl;
       BundleAdjustment ba;
@@ -236,10 +245,32 @@ namespace {
 
       // put the new vertex in to hash set
       for (const auto& frame_idx : controller->graphs_[ind]->frame_idx) {
+        if (!visited_frames.count(frame_idx)) {
+          merge_order.push_back(frame_idx);
+        }
         visited_frames.insert(frame_idx);
       }
 
       controller->graphs_.erase(controller->graphs_.begin() + ind);
+    }
+
+    GraphStruct tmp_graph;
+    tmp_graph.Str.resize(6, seq_len);
+    std::cout << "Frame merge order: ";
+    for (int i = 0; i < seq_len; ++i) {
+      std::cout << controller->graphs_[0]->frame_idx[i] << " ";
+      Eigen::MatrixXd K = controller->graphs_[0]->K[i];
+      Eigen::MatrixXd M = K * controller->graphs_[0]->Mot[i];
+      tmp_graph.Str.block(0, i, 3, 1) = -M.leftCols(3).inverse()*M.rightCols(1);
+      if (i == 0 || i == 1) {
+        tmp_graph.Str.block(3, i, 3, 1) << 255, 0, 0;
+      } else {
+        tmp_graph.Str.block(3, i, 3, 1) << 0, 255 - 15*(i-2), 0;
+      }
+    }
+    std::cout << std::endl;
+    if (!controller->writeGraphToPLYFile(tmp_graph, "./output/camera_pos.ply")) {
+      std::cerr << "Can not write the camera pos to .ply file";
     }
 
     if (!controller->writeGraphToPLYFile(*controller->graphs_[0].get(), "./output/result.ply")) {
