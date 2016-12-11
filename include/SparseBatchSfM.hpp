@@ -22,6 +22,9 @@ class SparseBatchSfM {
   static void run(const std::string& input_path);
   bool writeGraphToPLYFile(const GraphStruct& graphs,
                                   const char* filename);
+  bool writeGraphToPLYFile(const GraphStruct& graph,
+                           std::unordered_map<int, int> hash,
+                           const char* filename);
 
  private:
   static SparseBatchSfM* instance_;

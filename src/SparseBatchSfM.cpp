@@ -8,6 +8,7 @@
 #include <fstream>
 #include <string>
 #include <unordered_set>
+#include <unordered_map>
 
 #include "SparseBatchSfM.hpp"
 
@@ -98,6 +99,45 @@ namespace {
 
     return true;
   }
+
+  bool SparseBatchSfM::writeGraphToPLYFile(const GraphStruct& graph,
+                                           std::unordered_map<int, int> hash,
+                                           const char* filename) {
+    std::ofstream of(filename);
+
+    int n_points = graph.Str.cols();
+
+    of << "ply"
+       << '\n' << "format ascii 1.0"
+       << '\n' << "element vertex " << n_points
+       << '\n' << "property float x"
+       << '\n' << "property float y"
+       << '\n' << "property float z"
+       << '\n' << "property uchar red"
+       << '\n' << "property uchar green"
+       << '\n' << "property uchar blue"
+       << '\n' << "element edge" << n_points - 1
+       << '\n' << "property int vertex1"
+       << '\n' << "property int vertex2"
+       << '\n' << "property uchar red"
+       << '\n' << "property uchar green"
+       << '\n' << "property uchar blue"
+       << '\n' << "end_header" << std::endl;
+
+    for (int i = 0; i < n_points; ++i) {
+      of << graph.Str(0, i) << ' ' << graph.Str(1, i) << ' ' << graph.Str(2, i) << ' '
+         << graph.Str(3, i) << ' ' << graph.Str(4, i) << ' ' << graph.Str(5, i) << '\n';
+    }
+
+    of << 0 << ' ' << 1 << ' ' << graph.Str(3, 1) << ' ' << graph.Str(4, 1) << ' ' << graph.Str(5, 1) << '\n';
+    for (int i = 2; i < n_points; ++i) {
+      of << i - 1 << ' ' << i << ' ' << graph.Str(3, i) << ' ' << graph.Str(4, i) << ' ' << graph.Str(5, i) << '\n';
+    }
+
+    of.close();
+
+    return true;
+}
 
   void SparseBatchSfM::run(const std::string& input_path) {
     std::cout << "INPUT PARAMS" << std::endl;
