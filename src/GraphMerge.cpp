@@ -80,10 +80,10 @@ namespace sparse_batch_sfm {
 
           Eigen::MatrixXd Mi = graph.K[validFrameIdx[k]] * graph.Mot[validFrameIdx[k]];
 
-          // [x*m_3' - m_1'] 
+          // [x*m_3' - m_1']
           // [y*m_3' - m_2'] P = 0
-          // [x*m_3' - m_1'] 
-          // [y*m_3' - m_2'] 
+          // [x*m_3' - m_1']
+          // [y*m_3' - m_2']
           A.row(2*k)   = x * Mi.row(2) - Mi.row(0);
           A.row(2*k+1) = y * Mi.row(2) - Mi.row(1);
         }
