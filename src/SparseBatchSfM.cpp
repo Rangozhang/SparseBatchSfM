@@ -133,7 +133,7 @@ namespace {
     //                                         0,  0, 0, 0, 0, 8, 5, 0;
     // controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 0);
     // std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
-    controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 150);
+    controller->feature_processor_->skeletonize(controller->feature_struct_.skeleton, 140);
 
     std::cout << "skeleton: " << std::endl << controller->feature_struct_.skeleton << std::endl;
     std::vector<Edge> edges = {};
@@ -224,8 +224,8 @@ namespace {
         std::cout << "MultiTriangulate failed" << std::endl;
         return;
       }
-      std::cout << "Multi-triangulate: " << std::endl;
-      std::cout << (*controller->graphs_[0].get()).Str.leftCols(5);
+      //std::cout << "Multi-triangulate: " << std::endl;
+      //std::cout << (*controller->graphs_[0].get()).Str.leftCols(5);
 
       std::cout << "BundleAdjustment" <<std::endl;
       BundleAdjustment ba;
