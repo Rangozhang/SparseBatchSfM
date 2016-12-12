@@ -191,9 +191,6 @@ namespace sparse_batch_sfm {
     if (verbose) {
       std::cout << "init_val: " << init_val << " init_ind: " << init_ind << std::endl;
     }
-    if (init_ind < 0) {
-      return false;
-    }
     picked.insert(init_ind);
     pre_ind = init_ind;
     bin_mat.col(pre_ind).setZero();
@@ -300,6 +297,9 @@ namespace sparse_batch_sfm {
       std::cout << "mask: " << std::endl << mask << std::endl;
       std::cout << std::endl;
     }
+
+    // check if the skeleton graph is connected
+    // unordered_set<int> visited = {0};
 
     return true;
   }
