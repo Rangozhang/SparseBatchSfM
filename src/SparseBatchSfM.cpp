@@ -9,6 +9,7 @@
 #include <string>
 #include <unordered_set>
 #include <unordered_map>
+#include <time.h>
 
 #include "SparseBatchSfM.hpp"
 
@@ -140,6 +141,7 @@ namespace {
 }
 
   void SparseBatchSfM::run(const std::string& input_path) {
+    clock_t t1 = clock(), t2, t3;
     std::cout << "INPUT PARAMS" << std::endl;
     std::cout << "Input path: " << input_path << std::endl;
     SparseBatchSfM* controller = controller->getInstance();
@@ -237,6 +239,7 @@ namespace {
 
         controller->graphs_.push_back(std::move(graph));
     }
+    t2 = clock();
 
     /****** Merge graphs ******/
     std::cout << "Merge Graphs" << std::endl;
@@ -287,7 +290,7 @@ namespace {
       for (const auto& frame_idx : controller->graphs_[ind]->frame_idx) {
         if (visited_frames.count(frame_idx)) {
           pre = frame_idx;
-        } 
+        }
         visited_frames.insert(frame_idx);
       }
       for (int i = 0; i < controller->graphs_[0]->frame_idx.size(); ++i) {
@@ -322,6 +325,10 @@ namespace {
     if (!controller->writeGraphToPLYFile(*controller->graphs_[0].get(), "./output/result.ply")) {
       std::cerr << "Can not write the structure to .ply file.";
     }
+
+    t3 = clock();
+    std::cout << "Time before merging: " << (float(t2) - float(t1)) / CLOCKS_PER_SEC << " seconds" << std::endl;
+    std::cout << "Time of merging: " << (float(t3) - float(t2)) / CLOCKS_PER_SEC << " seconds" << std::endl;
 
     return;
   }
