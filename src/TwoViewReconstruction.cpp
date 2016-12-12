@@ -11,7 +11,7 @@
 namespace sparse_batch_sfm {
 
 namespace {
-  bool DEBUG = false;
+  bool DEBUG = true;
 }
 
   bool TwoViewReconstruction::reconstruct(FeatureStruct& feature_struct, int frame1, int frame2,
